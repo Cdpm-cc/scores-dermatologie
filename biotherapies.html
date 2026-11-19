@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biothérapies</title>
+<style>
+/* Même charte que Scores Dermatologiques : bandeau collant (titre + onglets à pastille), cartes blanches à en-tête coloré, une palette par onglet. */
+:root{
+  --bg:#FAF5EE; --surface:#FFFFFF; --surface-2:#FDF8F2; --ink:#2D1B00; --muted:#8B7355; --line:#EDE0D0;
+  --gold:#D0B896; --cream:#FAF5EE; --head:#2D1B00; --accent-soft:#F3E9DB;
+  --font-display:Georgia, "Times New Roman", serif;
+  --font-body:Georgia, "Times New Roman", serif;
+  --font-ui:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --top-h:76px;
+  color-scheme:light;
+}
+:root[data-tab="psoriasis"]{--head:#8A3B22; --ink:#3A1608; --muted:#A85A3C; --gold:#F2C9B3; --bg:#FCF5F1; --line:#F1DCCF; --surface-2:#FEF9F6; --accent-soft:#F8E5DA}
+:root[data-tab="dermatite"]{--head:#3F5A2A; --ink:#1C2810; --muted:#6A7F4B; --gold:#D3DFB4; --bg:#F6F8F0; --line:#E1E8D2; --surface-2:#FBFCF7; --accent-soft:#EAF0DD}
+:root[data-tab="verneuil"]{--head:#1F5559; --ink:#0D272A; --muted:#4A7F82; --gold:#B5DCDC; --bg:#F2F8F8; --line:#D6E7E6; --surface-2:#F8FCFC; --accent-soft:#E0EFEE}
+:root[data-tab="pelade"]{--head:#2F4170; --ink:#141E36; --muted:#5A6D98; --gold:#C3CFEA; --bg:#F4F6FB; --line:#DCE2F0; --surface-2:#F9FAFD; --accent-soft:#E5EAF6}
+:root[data-tab="urticaire"]{--head:#8C3048; --ink:#3A0F1A; --muted:#A6566A; --gold:#F3C3CE; --bg:#FCF4F6; --line:#F1DAE0; --surface-2:#FEF9FA; --accent-soft:#F8E3E8}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:15px; line-height:1.5}
+body, .top, .calc-head{transition:background-color .35s ease, color .35s ease}
+.wrap{max-width:1280px; margin:0 auto; padding-left:16px; padding-right:16px}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:normal; margin:0; line-height:1.2}
+p{margin:0}
+
+/* bandeau */
+.top{position:sticky; top:0; z-index:20; background:var(--head); box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 6px 18px -12px rgba(0,0,0,.45)}
+.top .wrap{padding-block:14px 10px; display:flex; flex-direction:column; gap:10px}
+.top h1{font-size:19px; color:var(--cream); letter-spacing:-0.3px}
+.top .byline{margin:3px 0 0; font-family:var(--font-ui); font-size:11px; letter-spacing:0.3px; color:var(--gold); opacity:.85}
+.tablist{display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:6px; width:100%}
+.tablist a{display:flex; align-items:center; gap:7px; min-width:0; min-height:34px; justify-content:center; text-align:center; line-height:1.15; text-decoration:none;white-space:nowrap; font-family:var(--font-ui); font-size:12px; font-weight:600; padding:6px 10px; border-radius:20px; border:1.5px solid rgba(255,255,255,.22); color:var(--gold); background:rgba(255,255,255,.06)}
+.tablist a::before{content:""; flex-shrink:0; width:8px; height:8px; border-radius:50%; background:var(--dot); box-shadow:0 0 0 1.5px rgba(255,255,255,.35)}
+.tablist a:hover{color:var(--cream); border-color:rgba(255,255,255,.45)}
+.tablist a[aria-current="page"]{background:var(--cream); color:var(--head); border-color:var(--cream)}
+a:focus-visible, button:focus-visible, input:focus-visible{outline:2px solid var(--muted); outline-offset:2px}
+
+/* mise en page : liste à gauche, contenu à droite */
+.app{padding-block:20px 40px; display:grid; grid-template-columns:270px minmax(0,1fr); gap:18px; align-items:start}
+.panel{display:flex; flex-direction:column; gap:14px; min-width:0}
+.panel-head{display:flex; flex-direction:column; gap:4px}
+.panel-head h2{font-size:22px}
+.panel-head p{font-family:var(--font-ui); font-size:13px; color:var(--muted)}
+
+aside{position:sticky; top:calc(var(--top-h) + 20px); max-height:calc(100vh - var(--top-h) - 40px); overflow:auto; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow:0 1px 6px rgba(139,115,85,.08)}
+input.num{font-family:var(--font-ui); font-size:13.5px; width:100%; padding:9px 12px; border:1.5px solid var(--line); border-radius:8px; background:var(--surface-2); color:var(--ink); outline:none}
+input.num:focus{border-color:var(--muted)}
+.gname{font-family:var(--font-ui); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin:14px 8px 4px}
+.it{display:flex; align-items:baseline; gap:8px; padding:6px 10px; border-radius:10px; text-decoration:none; color:var(--ink); border:1.5px solid transparent}
+.it:hover{border-color:var(--line)}
+.it[aria-current="page"]{background:var(--head); color:var(--cream)}
+.it b{font-weight:bold; font-size:14.5px}
+.it span{font-family:var(--font-ui); font-size:12px; color:var(--muted)}
+.it[aria-current="page"] span{color:var(--gold)}
+.it em{margin-left:auto; font-style:normal; font-family:var(--font-ui); font-size:10.5px; color:var(--muted)}
+.it.ov{font-family:var(--font-ui); font-size:13px; font-weight:600; margin-top:8px}
+
+/* carte (même composant que les scores) */
+.calc{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px -16px rgba(0,0,0,.18); display:flex; flex-direction:column; overflow:hidden}
+.calc-head{background:var(--head); color:var(--cream); box-shadow:inset 0 1px 0 rgba(255,255,255,.08); padding:14px 18px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px}
+.calc-head h3{font-size:22px; color:var(--cream)}
+.calc-head .range{font-family:var(--font-ui); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-top:3px}
+.chip{display:inline-flex; align-items:center; font-family:var(--font-ui); font-size:12px; font-weight:600; padding:5px 11px; border-radius:8px; border:1px solid rgba(255,255,255,.3); color:var(--gold); background:rgba(255,255,255,.08); white-space:nowrap}
+.calc-body{padding:18px 20px; display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:18px}
+.label{display:block; font-family:var(--font-ui); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:6px}
+.region{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px}
+.schema{border-left:4px solid var(--head); font-size:17px; font-weight:bold}
+.schema div+div{margin-top:6px}
+.sec{margin-bottom:14px}
+.sec ul{margin:0; padding-left:18px}
+.sec li{margin:3px 0}
+.copyrow{margin:0 20px 18px; background:var(--accent-soft); border:1px solid var(--line); border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:10px}
+.copyrow .sum{font-size:14px; line-height:1.5; white-space:pre-line}
+.btn{font-family:var(--font-ui); font-weight:700; font-size:12px; border:none; color:var(--cream); background:var(--head); border-radius:20px; padding:9px 18px; cursor:pointer; align-self:flex-start}
+.note{font-family:var(--font-ui); font-size:12px; color:var(--muted)}
+
+/* tableau récapitulatif */
+table.ov{width:100%; border-collapse:collapse}
+.ov th{text-align:left; font-family:var(--font-ui); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); font-weight:600; padding:10px 14px; border-bottom:1.5px solid var(--line)}
+.ov td{padding:10px 14px; border-top:1px solid var(--line); vertical-align:top}
+.ov tr.g td{background:var(--surface-2); font-family:var(--font-ui); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); font-weight:700; padding:7px 14px}
+.ov tr.r{cursor:pointer}
+.ov tr.r:hover td{background:var(--accent-soft)}
+.ov td.n b{font-size:16px; display:block}
+.ov td.n span{font-family:var(--font-ui); font-size:12px; color:var(--muted)}
+.ov td.c{font-family:var(--font-ui); font-size:12px; color:var(--muted); white-space:nowrap}
+.ov td.p{font-size:14px}
+.ov td.s{font-weight:bold}
+.ov td.s div+div{margin-top:2px}
+.info{background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--head); border-radius:12px; padding:14px 18px}
+.info h4{font-size:16px; font-weight:bold; margin-bottom:6px}
+.info ul{margin:4px 0; padding-left:18px}
+.info p{margin:4px 0; font-size:14.5px}
+.pn{display:flex; justify-content:space-between; gap:10px; font-family:var(--font-ui); font-size:13px; font-weight:600}
+.pn a{color:var(--muted); text-decoration:none}
+.pn a:hover{color:var(--ink)}
+footer .wrap{padding-block:0 32px; font-family:var(--font-ui); color:var(--muted); font-size:11.5px}
+
+
+/* couleurs par classe thérapeutique */
+.dot{display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--k); flex-shrink:0; align-self:center; box-shadow:0 0 0 2px color-mix(in srgb, var(--k) 25%, transparent)}
+.kchip{display:inline-flex; align-items:center; gap:6px; font-family:var(--font-ui); font-size:12px; font-weight:700; padding:3px 10px; border-radius:20px; background:color-mix(in srgb, var(--k) 14%, #fff); color:color-mix(in srgb, var(--k) 80%, #000); border:1px solid color-mix(in srgb, var(--k) 35%, #fff); white-space:nowrap}
+.ov tr.r td:first-child{box-shadow:inset 5px 0 0 var(--k)}
+.ov tr.r:hover td{background:color-mix(in srgb, var(--k) 7%, #fff)}
+.legend{display:flex; flex-wrap:wrap; gap:6px}
+.calc.drug{border-top:6px solid var(--k)}
+.calc.drug .calc-head{background:linear-gradient(100deg, var(--head) 55%, color-mix(in srgb, var(--k) 70%, var(--head)))}
+.calc.drug .schema{border-left-color:var(--k); background:color-mix(in srgb, var(--k) 7%, #fff)}
+.it[aria-current="page"]{background:color-mix(in srgb, var(--k, var(--head)) 75%, #000)}
+.sfd{display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-family:var(--font-ui); font-weight:700; font-size:13px; color:#fff; background:var(--k); border-radius:20px; padding:10px 18px; box-shadow:0 4px 12px -6px var(--k)}
+.sfd:hover{filter:brightness(1.08)}
+.sfdbox{display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; margin:0 20px 18px; padding:12px 14px; border:1.5px dashed color-mix(in srgb, var(--k) 45%, #fff); border-radius:10px; background:color-mix(in srgb, var(--k) 5%, #fff)}
+.sfdmini{font-family:var(--font-ui); font-size:11.5px; font-weight:700; text-decoration:none; color:color-mix(in srgb, var(--k) 85%, #000); border:1px solid color-mix(in srgb, var(--k) 40%, #fff); border-radius:14px; padding:2px 9px; white-space:nowrap}
+.sfdmini:hover{background:color-mix(in srgb, var(--k) 12%, #fff)}
+
+
+/* tableau compact */
+table.ov{font-size:13.5px; line-height:1.35}
+.ov th{padding:7px 12px; font-size:10px}
+.ov td{padding:6px 12px; vertical-align:middle}
+.ov tr.g td{padding:4px 12px; font-size:10px}
+.ov td.n{white-space:nowrap}
+.ov td.n b{display:inline; font-size:14.5px; margin-right:6px}
+.ov td.n span{font-size:11.5px}
+.ov td.p{font-size:12.5px; color:var(--muted)}
+.ov td.s{font-weight:600; font-size:13.5px}
+.ov td.s .st{display:inline}
+.ov td.s .st+.st::before{content:" → "; color:var(--muted); font-weight:400}
+.ov .kchip{font-size:11px; padding:1px 8px}
+.sfdmini{font-size:10.5px; padding:1px 8px}
+.info{padding:10px 16px}
+.info h4{font-size:14.5px; margin-bottom:4px}
+.info ul, .info p{font-size:13.5px; margin:2px 0}
+.info li{margin:1px 0}
+.panel{gap:10px}
+
+@media (min-width:980px){
+  .top .wrap{flex-direction:row; align-items:center; justify-content:space-between; gap:24px; padding-block:12px}
+  .tablist{width:880px; flex-shrink:0}
+}
+@media (max-width:900px){
+  :root{--top-h:120px}
+  .app{grid-template-columns:1fr} aside{position:static; max-height:none}
+  .calc-body{grid-template-columns:1fr}
+}
+@media (max-width:480px){ .tablist{grid-template-columns:repeat(3,minmax(0,1fr))} .tablist a::before{display:none} }
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+
+/* étapes du schéma */
+.steps{margin:0; display:grid; grid-template-columns:max-content 1fr; gap:6px 14px; align-items:baseline}
+.steps dt{font-family:var(--font-ui); font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:color-mix(in srgb, var(--k, var(--muted)) 80%, #000)}
+.steps dd{margin:0; font-weight:bold; font-size:16.5px}
+.ov .steps{gap:2px 10px}
+.ov .steps dt{font-size:9.5px}
+.ov .steps dd{font-size:13.5px; font-weight:600}
+.sfdtop{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; padding:12px 20px; background:color-mix(in srgb, var(--k) 6%, #fff); border-bottom:1px solid var(--line)}
+.back{display:none}
+/* téléphone */
+@media (max-width:760px){
+  body{font-size:15px}
+  .top .wrap{padding-block:10px 8px; gap:8px}
+  .top h1{font-size:18px}
+  .top .byline{display:none}
+  .tablist{display:flex; overflow-x:auto; gap:6px; scrollbar-width:none; margin:0 -16px; padding:0 16px 2px}
+  .tablist::-webkit-scrollbar{display:none}
+  .tablist a{flex:0 0 auto; font-size:13px; padding:7px 14px}
+  .tablist a::before{display:inline-block!important}
+  .app{grid-template-columns:1fr; padding-block:12px 30px; gap:12px}
+  aside{position:static; max-height:none; padding:8px; box-shadow:none}
+  aside .it, aside .gname{display:none}
+  aside.searching .it{display:flex}
+  aside.searching .gname{display:block}
+  .panel-head h2{font-size:21px}
+  .legend{display:none}
+  /* tableau → cartes */
+  table.ov, .ov tbody, .ov tr, .ov td{display:block; width:100%}
+  .ov tr:first-child{display:none}
+  .ov tr.g td{padding:8px 12px 4px; background:transparent; border:0}
+  .ov tr.r{border-top:1px solid var(--line); padding:10px 12px 10px 16px; box-shadow:inset 5px 0 0 var(--k); display:grid; grid-template-columns:1fr auto; gap:4px 10px}
+  .ov tr.r td{padding:0; border:0; box-shadow:none!important}
+  .ov td.n{grid-column:1} .ov td.c{grid-column:2; text-align:right}
+  .ov td.p{grid-column:1/-1} .ov td.s{grid-column:1/-1}
+  .ov td.f{grid-column:1/-1}
+  .ov td.f:empty{display:none}
+  .calc-head{padding:12px 14px}
+  .calc-head h3{font-size:20px}
+  .sfdtop{padding:10px 14px}
+  .sfd{width:100%; justify-content:center; padding:12px}
+  .sfdtop .note{display:none}
+  .calc-body{grid-template-columns:1fr; padding:14px; gap:12px}
+  .steps dd{font-size:15.5px}
+  .copyrow{margin:0 14px 14px}
+  .back{display:inline-block; font-family:var(--font-ui); font-size:13px; font-weight:600; color:var(--muted); text-decoration:none; margin-bottom:2px}
+  footer .wrap{padding-bottom:20px}
+}
+
+
+.amm{display:inline-flex; align-items:center; gap:5px; font-family:var(--font-ui); font-size:11px; font-weight:600; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:1px 7px; white-space:nowrap}
+.amm::before{content:"AMM"; font-size:9px; font-weight:800; letter-spacing:.5px; color:var(--muted)}
+.ov td.n .amm{display:inline-flex; margin-top:3px}
+.ov td.n{white-space:normal}
+.ov td.n .nm{white-space:nowrap; font-size:inherit; color:inherit; font-family:inherit}
+.ov td.n .nm span{font-family:var(--font-ui); font-size:11.5px; color:var(--muted)}
+.calc-head .amm{background:rgba(255,255,255,.12); color:var(--cream); border-color:rgba(255,255,255,.25)}
+.calc-head .amm::before{color:var(--gold)}
+.phrase .calc-head{flex-wrap:wrap}
+.phrase .calc-head .btn{background:var(--cream); color:var(--head); font-size:13px; padding:9px 18px}
+.phrase .sum{font-size:14.5px}
+
+
+:root[data-tab="vitiligo"]{--head:#6B5B2E; --ink:#2A2310; --muted:#8A7A4E; --gold:#E6D9B0; --bg:#FAF8F1; --line:#ECE5D2; --surface-2:#FDFCF7; --accent-soft:#F3EEDD}
+.wait{display:inline-flex; align-items:center; gap:6px; font-family:var(--font-ui); font-size:11px; font-weight:700; color:#92400E; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 8px}
+.wait::before{content:"⏳"}
+.ov tr.r.pending td{opacity:.75}
+.ov tr.r.pending td:first-child{box-shadow:inset 5px 0 0 #D1D5DB}
+.calc.drug.pending{border-top-style:dashed}
+
+
+:root[data-tab="cbcka"]{--head:#7A4E1E; --ink:#2E1C08; --muted:#9A6E3E; --gold:#F0D2A8; --bg:#FBF6EF; --line:#F0E2CF; --surface-2:#FEFAF5; --accent-soft:#F7EAD8}
+.gi h4{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.gi .btn{font-size:12px}
+.gi ul{margin-top:6px}
+.fbtns{display:flex; flex-wrap:wrap; gap:8px}
+
+
+.jakrisk summary{cursor:pointer; font-size:15px; list-style:none}
+.jakrisk summary::-webkit-details-marker{display:none}
+.jakrisk summary::before{content:"▸ "; color:var(--muted)}
+.jakrisk[open] summary::before{content:"▾ "}
+.jakrisk[open] summary .note{display:none}
+.jr h5{font-family:var(--font-ui); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin:14px 0 6px}
+.jt{width:100%; border-collapse:collapse; font-size:13.5px}
+.jt th{text-align:left; font-family:var(--font-ui); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); padding:5px 8px; border-bottom:1.5px solid var(--line)}
+.jt td{padding:6px 8px; border-top:1px solid var(--line); vertical-align:top}
+.jt td:first-child{white-space:nowrap}
+@media (max-width:760px){.jt, .jt tbody, .jt tr, .jt td{display:block} .jt tr:first-child{display:none} .jt tr{border-top:1px solid var(--line); padding:6px 0} .jt td{border:0; padding:2px 0}}
+
+</style>
+<style>
+.site-switch{display:flex;gap:6px;margin-bottom:10px}
+.site-switch a{font-family:var(--font-ui);font-size:13px;font-weight:600;padding:6px 14px;border-radius:16px;color:var(--cream);text-decoration:none;border:1px solid rgba(250,245,238,.35)}
+.site-switch a:hover{background:rgba(250,245,238,.12)}
+.site-switch a.on{background:var(--cream);color:var(--head);border-color:var(--cream)}
+@media print{.site-switch{display:none}}
+</style></head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div><nav class="site-switch" aria-label="Sections"><a href="./">Scores</a><a href="biotherapies.html" class="on" aria-current="page">Fiches biothérapies</a></nav><h1>Biothérapies</h1><p class="byline">Mémo de prescription – Dr Céline Clevy – Cabinet Dermatologique du Parc Mermoz</p></div>
+    <nav class="tablist" aria-label="Pathologies">
+      <a href="#psoriasis" data-t="psoriasis" style="--dot:#D9835C">Psoriasis</a>
+      <a href="#verneuil" data-t="verneuil" style="--dot:#6FAAAD">Verneuil</a>
+      <a href="#dermatite" data-t="dermatite" style="--dot:#9CB06B">Dermatite atopique</a>
+      <a href="#pelade" data-t="pelade" style="--dot:#8798C4">Pelade</a>
+      <a href="#vitiligo" data-t="vitiligo" style="--dot:#B0A27A">Vitiligo</a>
+      <a href="#cbcka" data-t="cbcka" style="--dot:#C9A35A">CBC / KA</a>
+      <a href="#urticaire" data-t="urticaire" style="--dot:#D27A8B">Urticaire</a>
+    </nav>
+  </div>
+</header>
+<main><div class="wrap app"><aside id="side"></aside><section class="panel" id="view"></section></div></main>
+<footer><div class="wrap">Aide-mémoire personnel destiné aux professionnels de santé. Ne remplace pas le RCP (base de données publique des médicaments), qui fait référence. Les posologies peuvent avoir changé depuis la dernière mise à jour : 04/11/2026. Dr Céline Clevy, dermatologue.</div></footer>
+<script>
+/* DONNÉES — reprises de la page Notion « Biothérapies » (et page Verneuil). Le champ fiche n'est pas utilisé. */
+const TABS=[
+{id:'psoriasis',title:'Psoriasis',sub:'Psoriasis modéré à sévère',
+ groups:[
+ {name:'Anti-IL23 et anti-IL12/23',items:[
+  {id:'stelara',amm:'Adulte · enfant dès 6 ans',nom:'STELARA',dci:'ustékinumab',cible:'anti-IL12/23',pres:'Seringue 45 mg et 90 mg',
+   schema:[['Induction','45 mg à S0 et S4'],['Entretien','45 mg toutes les 12 sem'],['Si > 100 kg','90 mg au lieu de 45 mg']],
+   biosim:'Pyzchiva, Uzpruvo, Wezenla (stylo)'},
+  {id:'ilumetri',amm:'Adulte uniquement',nom:'ILUMETRI',dci:'tildrakizumab',cible:'anti-IL23',pres:'Seringue 100 ou 200 mg · stylo 100 mg',
+   schema:[['Induction','100 mg à S0 et S4'],['Entretien','100 mg toutes les 12 sem'],['200 mg','d\'emblée si forme sévère (PASI > 20, zone difficile) ou ≥ 90 kg, ou si 100 mg insuffisant']],
+   notes:["Guide patient d'auto-injection Ilumetri"]},
+  {id:'tremfya',amm:'Adulte · enfant dès 6 ans',nom:'TREMFYA',dci:'guselkumab',cible:'anti-IL23',pres:'Seringue ou stylo 100 mg',
+   schema:[['Induction','100 mg à S0 et S4'],['Entretien','100 mg toutes les 8 sem']],
+   notes:['Chez l\'enfant : stylo 45 mg']},
+  {id:'skyrizi',amm:'Adulte uniquement',nom:'SKYRIZI',dci:'risankizumab',cible:'anti-IL23',pres:'Seringue ou stylo 150 mg',
+   schema:[['Induction','150 mg à S0 et S4'],['Entretien','150 mg toutes les 12 sem']]}
+ ]},
+ {name:'Anti-IL17',items:[
+  {id:'cosentyx',amm:'Adulte · enfant dès 6 ans',nom:'COSENTYX',dci:'sécukinumab',cible:'anti-IL17',pres:'Seringue ou stylo 150 mg et 300 mg',
+   schema:[['Induction','300 mg à S0, S1, S2, S3, S4'],['Entretien','300 mg toutes les 4 sem'],['Si ≥ 90 kg','300 mg toutes les 2 sem possible']],
+   notes:["Programme patient « Let's go »"]},
+  {id:'taltz',amm:'Adulte · enfant dès 6 ans et 25 kg',nom:'TALTZ',dci:'ixékizumab',cible:'anti-IL17',pres:'Seringue ou stylo 80 mg',
+   schema:[['S0','160 mg (2 injections)'],['S2 → S12','80 mg toutes les 2 sem'],['Entretien','80 mg toutes les 4 sem']],
+   notes:['Intéressant si atteinte unguéale ou génitale']},
+  {id:'kyntheum',amm:'Adulte uniquement',nom:'KYNTHEUM',dci:'brodalumab',cible:'anti-IL17',pres:'Seringue 210 mg (pas de stylo)',
+   schema:[['Induction','210 mg à S0, S1, S2'],['Entretien','210 mg toutes les 2 sem']],
+   notes:['Intéressant si atteinte palmo-plantaire, génitale ou du cuir chevelu','Pas d\'AMM en rhumatologie, mais efficace']},
+  {id:'bimzelx',amm:'Adulte uniquement',nom:'BIMZELX',dci:'bimékizumab',cible:'anti-IL17A et F',pres:'Seringue ou stylo 160 mg et 320 mg',
+   schema:[['Induction','320 mg à S0, S4, S8, S12, S16'],['Entretien','320 mg toutes les 8 sem'],['Si ≥ 120 kg','320 mg toutes les 4 sem possible après S16']],
+   notes:['Rhumatisme psoriasique : 160 mg toutes les 4 sem']}
+ ]},
+ {name:'Anti-TNF',items:[
+  {id:'humira',amm:'Adulte · enfant dès 4 ans',nom:'HUMIRA',dci:'adalimumab',cible:'anti-TNF',pres:'Seringue ou stylo 40 mg et 80 mg',
+   schema:[['Induction','80 mg à S0, puis 40 mg à S1'],['Entretien','40 mg toutes les 2 sem'],['Si insuffisant','après S16 : 40 mg / sem ou 80 mg / 2 sem']],
+   biosim:'Amgevita, Hukyndra'},
+  {id:'enbrel',amm:'Adulte · enfant dès 6 ans',nom:'ENBREL',dci:'étanercept',cible:'anti-TNF',pres:'Seringue ou stylo 25 mg et 50 mg',
+   schema:[['Standard','50 mg / sem (ou 25 mg × 2 / sem)'],['Option','50 mg × 2 / sem pendant 12 sem max']],
+   biosim:'Benepali'},
+  {id:'remicade',amm:'Adulte uniquement',nom:'REMICADE',dci:'infliximab',cible:'anti-TNF · IV',pres:'Perfusion intraveineuse',
+   schema:[['Induction','5 mg/kg à S0, S2, S6'],['Entretien','5 mg/kg toutes les 8 sem']],
+   biosim:'Inflectra, Remsima'}
+ ]},
+ {name:'Traitements non biologiques',items:[
+  {id:'mtx',amm:'Adulte uniquement (psoriasis)',nom:'MÉTHOTREXATE',dci:'Nordimet · Imeth · Imenor',cible:'1 fois / semaine',
+   pshort:'Nordimet stylo · Imeth seringue · Imenor cp',
+   pres:'Nordimet stylo 7,5 à 25 mg (paliers de 2,5 mg, boîte de 4) · Imeth seringue · Imenor comprimé 2,5 mg ou 10 mg sécable',
+   schema:[['Rythme','1 seule prise par semaine, toujours le même jour'],['Début','7,5 mg / sem'],['Dose usuelle','10 à 25 mg / sem (max 25 mg)']],
+   notes:['Écrire le jour de prise sur l\'ordonnance','Imeth comprimés arrêtés : remplacés par Imenor']},
+  {id:'otezla',amm:'Adulte · enfant dès 6 ans et 20 kg',nom:'OTEZLA',dci:'aprémilast',cible:'anti-PDE4 · PO',pres:'Comprimés 10, 20 et 30 mg · boîte d\'initiation',
+   schema:[['J1','10 mg le matin'],['J2','10 mg matin et soir'],['J3','10 mg matin, 20 mg soir'],['J4','20 mg matin et soir'],['J5','20 mg matin, 30 mg soir'],['Dès J6','30 mg matin et soir']],
+   notes:['Enfant : 20 mg × 2 / jour (20 à < 50 kg) ou 30 mg × 2 / jour (≥ 50 kg), même titration','IR sévère (DFG < 30) : 30 mg 1 fois / jour','Évaluer à 24 sem','Troubles digestifs surtout les premières semaines ; surveiller humeur et poids','Contre-indiqué pendant la grossesse'],
+   extra:'otezla-gi'},
+  {id:'sotyktu',amm:'Adulte uniquement',nom:'SOTYKTU',dci:'deucravacitinib',cible:'anti-TYK2 · PO',pres:'Comprimé 6 mg',
+   schema:[['Dose','6 mg / jour'],['Évaluer','à 24 sem']]}
+ ]}
+]},
+{id:'verneuil',title:'Maladie de Verneuil',sub:'Hidradénite suppurée',
+ boxes:[{h:'Associations possibles',li:['Azithromycine 500 mg 3 fois / sem','Spironolactone (Aldactone) 100 mg / jour']}],
+ groups:[{name:'Biothérapies',items:[
+  {id:'humira-hs',amm:'Adulte · adolescent dès 12 ans et 30 kg',nom:'HUMIRA',dci:'adalimumab',cible:'anti-TNF',pres:'Seringue ou stylo 40 mg et 80 mg',
+   schema:[['J1','160 mg (en 1 jour ou sur 2 jours)'],['J15','80 mg'],['Dès J29','40 mg / sem ou 80 mg / 2 sem']],
+   notes:['Réévaluer à 12 sem si pas d\'amélioration'],biosim:'Amgevita, Hukyndra'},
+  {id:'cosentyx-hs',amm:'Adulte uniquement',nom:'COSENTYX',dci:'sécukinumab',cible:'anti-IL17',pres:'Seringue ou stylo 150 mg et 300 mg',
+   schema:[['Induction','300 mg à S0, S1, S2, S3, S4'],['Entretien','300 mg toutes les 4 sem'],['Si insuffisant','300 mg toutes les 2 sem']]},
+  {id:'bimzelx-hs',amm:'Adulte uniquement',nom:'BIMZELX',dci:'bimékizumab',cible:'anti-IL17A et F',pres:'Seringue ou stylo 160 mg et 320 mg',
+   schema:[['Jusqu\'à S16','320 mg toutes les 2 sem'],['Entretien','320 mg toutes les 4 sem']],
+   notes:['320 mg = 1 stylo de 320 mg ou 2 de 160 mg','Efficacité > Cosentyx']}
+ ]}]},
+{id:'dermatite',title:'Dermatite atopique',sub:'Biothérapies et anti-JAK',
+ after:{h:'Phrase type à copier dans le dossier',sub:'femme jeune sous COP avec antécédent familial de MTEV',grp:'Anti-JAK',quote:"Patiente présentant une dermatite atopique modérée à sévère (EASI [x], SCORAD [x], DLQI [x]), en échec de [traitements antérieurs], candidate à un traitement par inhibiteur de JAK. Pas d'antécédent personnel thromboembolique. Antécédent familial de thrombose veineuse profonde chez sa mère ([âge, contexte, bilan de thrombophilie réalisé ou non]). Contraception œstroprogestative en cours. Le rapport bénéfice-risque a été discuté conformément aux recommandations, en tenant compte des restrictions d'utilisation des anti-JAK chez les patients à risque et des alternatives disponibles (biothérapies anti-interleukines). Il a été proposé de remplacer la contraception œstroprogestative par une méthode sans œstrogène avant de débuter le traitement. La patiente a été informée des risques du traitement, notamment thromboemboliques, cardiovasculaires, infectieux et tumoraux, ainsi que des signes de thrombose veineuse devant la faire consulter en urgence. Une information écrite lui a été remise. Après discussion, la patiente donne son accord pour débuter le traitement."},
+ groups:[
+ {name:'Biothérapies',items:[
+  {id:'dupixent',amm:'Dès 6 mois',nom:'DUPIXENT',dci:'dupilumab',cible:'anti-IL4/IL13',pres:'Seringue ou stylo 200 et 300 mg',
+   schema:[['S0','600 mg (2 × 300 mg)'],['Entretien','300 mg toutes les 2 sem']],
+   notes:['Schéma adulte','Document de bon usage pour le patient']},
+  {id:'adtralza',amm:'Dès 12 ans',nom:'ADTRALZA',dci:'tralokinumab',cible:'anti-IL13',pres:'Seringue 150 mg · stylo 300 mg',
+   schema:[['S0','600 mg (4 seringues ou 2 stylos)'],['Entretien','300 mg toutes les 2 sem'],['Si blanchi à S16','300 mg toutes les 4 sem possible']],
+   },
+  {id:'ebglyss',amm:'Dès 12 ans et 40 kg',nom:'EBGLYSS',dci:'lébrikizumab',cible:'anti-IL13',pres:'Seringue ou stylo 250 mg',
+   schema:[['S0 et S2','500 mg (2 injections)'],['S4 → S16','250 mg toutes les 2 sem'],['Entretien','250 mg toutes les 4 sem']],
+   notes:['Si réponse partielle : rester toutes les 2 sem jusqu\'à S24','Efficace sur tête et cou']},
+  {id:'nemluvio',amm:'Dès 12 ans (prurigo nodulaire : adulte)',nom:'NEMLUVIO',dci:'némolizumab',cible:'anti-IL31',pres:'Stylo 30 mg à mélanger (attendre 5 min)',
+   schema:[['S0','60 mg (2 injections)'],['Entretien','30 mg toutes les 4 sem'],['Après S16','30 mg toutes les 8 sem si très bonne réponse']],
+   notes:['Profil « prurit dominant »','Prurigo nodulaire : idem, sauf ≥ 90 kg : 60 mg toutes les 4 sem']}
+ ]},
+ {name:'Anti-JAK',box:{h:'Anti-JAK — avant de prescrire',html:
+  '<ul><li><b>Profil :</b> moins de 65 ans, non-fumeur, sans facteur de risque CV. Demi-dose si risque de MTEV.</li>'+
+  '<li><b>Vaccins :</b> Shingrix (2 doses à 1 mois), Prevenar 20, grippe.</li>'+
+  '<li><b>Bilan :</b> NFS, BH, iono, créatinine, EAL, TP-TCA, CPK, hCG, sérologies VIH-VHB-VHC, Quantiféron, radio thorax, panoramique dentaire.</li>'+
+  '<li><b>CI :</b> grossesse, insuffisance hépatique sévère, DFG &lt; 30.</li>'+
+  '<li><b>Surveillance :</b> NFS, iono, créatinine, BH, EAL, CPK — 1 fois / mois × 3, puis tous les 3 mois.</li>'+
+  '<li><b>Arrêter si :</b> pas d\'effet à 8 sem · grossesse ou projet (arrêt 1 sem avant la contraception) · zona, infection · lymphocytes &lt; 0,5, PNN &lt; 1, Hb &lt; 8 · cytolyse.</li></ul>'},
+  items:[
+  {id:'olumiant-da',amm:'Dès 2 ans',nom:'OLUMIANT',dci:'baricitinib',cible:'JAK 1-2 · PO',pres:'Comprimé 2 mg et 4 mg',
+   schema:[['Dose','4 mg / jour'],['Réduire','2 mg / jour si contrôlé, ou si ≥ 75 ans']],
+   notes:['Effet en 1 à 2 sem','EI : infections ORL, herpès, LDL ↑, thrombocytose, troubles digestifs, acné']},
+  {id:'rinvoq',amm:'Dès 12 ans',nom:'RINVOQ',dci:'upadacitinib',cible:'JAK 1 · PO',pres:'Comprimé 15 mg et 30 mg',
+   schema:[['Adulte','15 ou 30 mg / jour'],['≥ 65 ans','15 mg / jour'],['Ensuite','dose minimale efficace']],
+   notes:['Effet en 1 à 2 sem','EI : infections ORL, herpès, LDL ↑, anémie, neutropénie, CPK ↑, troubles digestifs, acné','Supérieur au dupilumab seulement à 30 mg, tolérance moins bonne']},
+  {id:'cibinqo',amm:'Dès 12 ans',nom:'CIBINQO',dci:'abrocitinib',cible:'JAK 1 · PO',pres:'Comprimé 50, 100 et 200 mg',
+   schema:[['Début','200 mg / jour (100 mg si ≥ 65 ans)'],['Ensuite','dose minimale efficace : 100 mg (50 mg si IR modérée)']],
+   notes:['EI : dyslipidémie, thrombose, infections, réactivations virales']}
+ ]}
+]},
+{id:'pelade',title:'Pelade',sub:'Anti-JAK',
+ groups:[{name:'Anti-JAK',items:[
+  {id:'litfulo',amm:'Dès 12 ans',nom:'LITFULO',dci:'ritlécitinib',cible:'JAK 3 + TEC · PO',pres:'Gélule 50 mg',
+   schema:[['Dose','50 mg / jour']],
+   notes:['Pas de PIH','Bilan : NFS, plaquettes, lipides, rein, foie, tuberculose, hépatites, radio thorax','Vaccins à jour + pneumocoque + zona','NFS-plaquettes : M1, puis tous les 3 mois, puis tous les 6 mois la 3e année']},
+  {id:'olumiant-pelade',amm:'Adulte',nom:'OLUMIANT',dci:'baricitinib',cible:'JAK 1-2 · PO',pres:'Comprimé 2 mg et 4 mg',
+   schema:[['Dose','4 mg / jour'],['Réduire','2 mg / jour une fois la réponse obtenue']],
+   notes:['Remboursé dans la pelade de l\'adulte (avis HAS 2023)','Adolescent : AMM européenne 2026, pas d\'avis de remboursement HAS à ce jour','NFS, BH, lipides tous les 3 mois','Arrêt si pas de bénéfice à 36 sem (≈ 9 mois)']}
+ ]},
+ {name:'En attente',items:[
+  {id:'rinvoq-pelade',nom:'RINVOQ',dci:'upadacitinib',cible:'JAK 1 · PO',amm:'Adulte · adolescent dès 12 ans (attendu)',wait:'Avis CHMP favorable (juin 2026) · pas encore remboursé en France',
+   pres:'Comprimé 15 mg et 30 mg',schema:[['Posologie','à confirmer au RCP']]}
+ ]}],
+ after:{h:'Phrase type à copier dans le dossier',sub:'Femme jeune sous COP avec antécédent familial de MTEV',quote:"Patiente présentant une pelade sévère (SALT [x]), candidate à un traitement par inhibiteur de JAK. Pas d'antécédent personnel thromboembolique. Antécédent familial de thrombose veineuse profonde chez sa mère ([âge, contexte, bilan de thrombophilie réalisé ou non]). Contraception œstroprogestative en cours. Le rapport bénéfice-risque a été discuté conformément aux recommandations, en tenant compte des restrictions d'utilisation des anti-JAK chez les patients à risque. Il a été proposé de remplacer la contraception œstroprogestative par une méthode sans œstrogène avant de débuter le traitement. La patiente a été informée des risques du traitement, notamment thromboemboliques, cardiovasculaires, infectieux et tumoraux, ainsi que des signes de thrombose veineuse devant la faire consulter en urgence. Une information écrite lui a été remise. Après discussion, la patiente donne son accord pour débuter le traitement."}
+},
+{id:'vitiligo',title:'Vitiligo',sub:'Vitiligo non segmentaire',
+ groups:[
+ {name:'Disponible',items:[
+  {id:'opzelura',nom:'OPZELURA',dci:'ruxolitinib crème 1,5 %',cible:'JAK 1-2 · crème',amm:'Dès 12 ans',pres:'Crème 15 mg/g, tube 100 g',
+   schema:[['Application','2 fois / jour, à au moins 8 h d\'intervalle'],['Surface','jusqu\'à 10 % de la surface corporelle'],['Évaluer','à 24 sem (repigmentation lente)']],
+   notes:['Vitiligo non segmentaire avec atteinte faciale','Remboursé à 65 %, disponible en ville','Contre-indiqué pendant la grossesse et l\'allaitement']}
+ ]},
+ {name:'En attente',items:[
+  {id:'rinvoq-vitiligo',nom:'RINVOQ',dci:'upadacitinib',cible:'JAK 1 · PO',amm:'Adulte · adolescent dès 12 ans (attendu)',wait:'Avis CHMP favorable (juin 2026) · pas encore remboursé en France',
+   pres:'Comprimé 15 mg',schema:[['Dose étudiée','15 mg / jour']],notes:['Premier traitement systémique du vitiligo','Études Viti-Up : repigmentation évaluée à 48 sem']},
+  {id:'litfulo-vitiligo',nom:'LITFULO',dci:'ritlécitinib',cible:'JAK 3 + TEC · PO',amm:'Dès 12 ans (études)',wait:'Phase 3 positive (2026) · dossier à venir',
+   pres:'Gélule 50 mg',schema:[['Doses étudiées','50 mg ou 100 mg / jour']],notes:['Déjà disponible dans la pelade']},
+  {id:'povorcitinib',nom:'POVORCITINIB',dci:'povorcitinib',cible:'JAK 1 · PO',amm:'Adulte (études)',wait:'Phase 3 positive (2026) · dossier prévu en 2027',
+   pres:'Comprimé',schema:[['Dose étudiée','30 mg / jour']],notes:['Laboratoire Incyte']}
+ ]}
+]},
+{id:'cbcka',title:'CBC / KA',sub:'Carcinome basocellulaire superficiel et kératoses actiniques',
+ boxes:[{h:'Fiche patient sur la maladie',li:['<a href="https://www.cancerdelapeau.org/upload/fichesinfos/3272-Carcinome-basocellulaire.pdf" target="_blank" rel="noopener">Carcinome basocellulaire — fiche cancerdelapeau.org</a>']}],
+ groups:[
+ {name:'Topiques',items:[
+  {id:'aldara',amm:'Adulte',nom:'ALDARA',dci:'imiquimod 5 %',cible:'topique',pres:'Crème 5 %, sachets',
+   schema:[['KA','3 fois / sem (ex. lun-mer-ven) pendant 4 sem'],['KA ensuite','pause 4 sem, contrôle ; 2e cycle de 4 sem si besoin'],['CBC superficiel','5 fois / sem pendant 6 sem']],
+   notes:['Appliquer le soir, laisser environ 8 h puis laver','KA : zone traitée de 25 cm² au maximum'],
+   fiches:[['Fiche patient — KA','https://www.cancerdelapeau.org/upload/fichesinfos/6004-ALDARA-pour-keratoses-actiniqu.pdf'],['Fiche patient — CBC','https://www.cancerdelapeau.org/upload/fichesinfos/9536-ALDARA-pour-carcinome-basocell.pdf']]},
+  {id:'zyclara',amm:'Adulte',nom:'ZYCLARA',dci:'imiquimod 3,75 %',cible:'topique',pres:'Crème 3,75 %, sachets',
+   schema:[['Cycle 1','1 fois / jour pendant 2 sem'],['Pause','2 sem'],['Cycle 2','1 fois / jour pendant 2 sem']],
+   notes:['KA du visage ou du cuir chevelu (traitement de champ)'],
+   fiches:[['Fiche patient — KA','https://www.cancerdelapeau.org/upload/fichesinfos/7827-ZYCLARA-pour-keratoses-actiniq.pdf']]},
+  {id:'efudix',amm:'Adulte',nom:'EFUDIX',dci:'5-fluorouracile 5 %',cible:'topique',pres:'Crème 5 %, tube 20 g',
+   schema:[['Application','1 à 2 fois / jour en couche mince, sur les lésions'],['Durée','3 à 4 sem en général'],['Surface','500 cm² maximum à la fois']],
+   notes:['AMM France : KA, maladie de Bowen, condylomes (CBC superficiel : hors AMM en France)','Contre-indiqué : grossesse, allaitement, déficit en DPD, brivudine','Éviter le soleil pendant le traitement'],
+   fiches:[['Fiche patient — 5-FU topique','https://www.cancerdelapeau.org/upload/fichesinfos/1711-5FLUOROURACILE-TOPIQUE.pdf']]}
+ ]},
+ {name:'Photothérapie dynamique',items:[
+  {id:'pdt-conv',amm:'Adulte',nom:'PDT CONVENTIONNELLE',dci:'Metvixia + lumière rouge',cible:'PDT',pres:'Crème Metvixia 168 mg/g · lampe à lumière rouge',
+   schema:[['Préparation','curetage doux des squames et croûtes'],['Application','crème sous pansement occlusif 3 h'],['Illumination','lumière rouge 37 J/cm²'],['Réévaluer','à 3 mois']],
+   notes:['Prendre la tension avant (la douleur peut l\'augmenter)','Ne pas appliquer sur paupières et muqueuses'],
+   fiches:[['Fiche patient — PDT conventionnelle','https://www.cancerdelapeau.org/upload/fichesinfos/8393-PDT-conventionnelle.pdf']]},
+  {id:'pdt-day',amm:'Adulte',nom:'PDT LUMIÈRE DU JOUR',dci:'Metvixia + lumière naturelle',cible:'PDT',pres:'Crème Metvixia 168 mg/g',
+   schema:[['Avant','écran solaire à filtres chimiques sur toutes les zones exposées'],['Application','préparation des lésions puis crème, sans occlusion'],['Exposition','dehors dans les 30 min, 2 h consécutives'],['Après','retirer la crème à l\'eau']],
+   notes:['KA légères à modérées du visage et du cuir chevelu','Seulement si la météo permet 2 h dehors confortablement (pas de pluie)'],
+   fiches:[['Fiche patient — PDT lumière du jour','https://www.cancerdelapeau.org/upload/fichesinfos/6149-PDT-daylight.pdf']]}
+ ]}
+]},
+{id:'urticaire',title:'Urticaire',sub:'Urticaire chronique spontanée',
+ groups:[{name:'Biothérapie',items:[
+  {id:'xolair',amm:'Dès 12 ans',nom:'XOLAIR',dci:'omalizumab',cible:'anti-IgE',pres:'Seringue 150 mg',
+   schema:[['Dose','300 mg (2 × 150 mg) toutes les 4 sem']],
+   notes:['4 premières injections par une IDE']}
+ ]}]}
+];
+
+const SFD={"otezla": "https://www.sfdermato.org/upload/fiche/39_pso-fichespatients-apremilast.pdf", "humira": "https://www.sfdermato.org/upload/fiche/6_pso-fichespatients-adalimumab.pdf", "humira-hs": "https://www.sfdermato.org/upload/fiche/6_pso-fichespatients-adalimumab.pdf", "enbrel": "https://www.sfdermato.org/upload/fiche/7_pso-fichespatients-etanercept.pdf", "remicade": "https://www.sfdermato.org/upload/fiche/8_pso-fichespatients-infliximab.pdf", "cosentyx": "https://www.sfdermato.org/upload/fiche/41_pso-fichespatients-secukinumab.pdf", "cosentyx-hs": "https://www.sfdermato.org/upload/fiche/41_pso-fichespatients-secukinumab.pdf", "taltz": "https://www.sfdermato.org/upload/fiche/43_pso-fichespatients-ixekizumab.pdf", "kyntheum": "https://www.sfdermato.org/upload/fiche/79_pso-fichespatients-brodalumab.pdf", "bimzelx": "https://www.sfdermato.org/upload/fiche/260605120545_pso-fichespatients-bimekizumab.pdf", "bimzelx-hs": "https://www.sfdermato.org/upload/fiche/260605120545_pso-fichespatients-bimekizumab.pdf", "stelara": "https://www.sfdermato.org/upload/fiche/9_pso-fichespatients-ustekinumab.pdf", "ilumetri": "https://www.sfdermato.org/upload/fiche/109_pso-fichespatients-tildrakizumab.pdf", "tremfya": "https://www.sfdermato.org/upload/fiche/45_pso-fichespatients-guselkumab.pdf", "skyrizi": "https://www.sfdermato.org/upload/fiche/152_pso-fichespatients-risankizumab.pdf", "mtx": "https://www.sfdermato.org/upload/fiche/4_pso-fichespatients-methotrexate.pdf", "dupixent": "https://www.sfdermato.org/upload/fiche/ficche-site-grand-public-sfd-a-nosbaum-20190311-fiche-dupilumab-finale-1-f418e8dd0d63fe69dc784289f691485c-cd441bad4c60e64259568688665f5117.pdf", "adtralza": "https://www.sfdermato.org/upload/fiche/fiche-tralokinumab-great-mtauber-dss.pdf", "ebglyss": "https://www.sfdermato.org/upload/fiche/260608090327_fiche-info-great-lebrikizumab-v2.pdf", "nemluvio": "https://www.sfdermato.org/upload/fiche/260828050310_fiche-info-great-nemolizumab.pdf", "olumiant-da": "https://www.sfdermato.org/upload/fiche/ficheinfobaricitinibgreatlast-5844db78a7329dee5de4d2d6ea6585a1.pdf", "olumiant-pelade": "https://www.sfdermato.org/upload/fiche/ficheinfobaricitinibgreatlast-5844db78a7329dee5de4d2d6ea6585a1.pdf", "rinvoq": "https://www.sfdermato.org/upload/fiche/240823101925_upadacitinib-rinvoq.pdf", "cibinqo": "https://www.sfdermato.org/upload/fiche/240823101745_abrocitinib-cibinqo.pdf", "xolair": "https://www.sfdermato.org/upload/fiche/omalizumab-gus-version-finale-sept-2019-5a0c3413790078850c78aa7521486b08.pdf"};
+const SFD_NOTE={"humira-hs": "fiche psoriasis", "cosentyx-hs": "fiche psoriasis", "bimzelx-hs": "fiche psoriasis", "olumiant-pelade": "fiche dermatite atopique"};
+/* ===================== RENDU ===================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>String(s).replace(/<[^>]+>/g,'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const LIST=[];TABS.forEach(t=>t.groups.forEach(g=>g.items.forEach(d=>LIST.push({t,g,d}))));
+let cur={tab:TABS[0].id,id:null},q='';
+const KL={tnf:['Anti-TNF','#D97706'],il17:['Anti-IL17','#DC2626'],il1223:['Anti-IL12/23','#4F46E5'],il23:['Anti-IL23','#7C3AED'],il413:['Anti-IL4/IL13','#16A34A'],il31:['Anti-IL31','#0D9488'],jak:['Anti-JAK','#2563EB'],tyk2:['Anti-TYK2','#0891B2'],pde4:['Anti-PDE4','#0EA5E9'],topique:['Topique','#CA8A04'],pdt:['Photothérapie dynamique','#EA580C'],ige:['Anti-IgE','#DB2777'],conv:['Conventionnel','#78716C']};
+function kof(d){const c=d.cible;return /TNF/.test(c)?'tnf':/IL17/.test(c)?'il17':/IL12\/23/.test(c)?'il1223':/IL23/.test(c)?'il23':/IL4|IL13/.test(c)?'il413':/IL31/.test(c)?'il31':/JAK/.test(c)?'jak':/TYK2/.test(c)?'tyk2':/PDE4/.test(c)?'pde4':/topique/.test(c)?'topique':/PDT/.test(c)?'pdt':/IgE/.test(c)?'ige':'conv'}
+const K=d=>KL[kof(d)][1];
+const kchip=d=>`<span class="kchip" style="--k:${K(d)}">${d.cible}</span>`;
+const hasF=d=>!!(SFD[d.id]||d.fiches);
+const sfdLink=(d,mini)=>d.fiches?(mini?d.fiches.map((f,i)=>`<a class="sfdmini" style="--k:${K(d)}" href="${f[1]}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Fiche${d.fiches.length>1?' '+f[0].split('— ')[1]:''}</a>`).join(' '):`<span class="fbtns">${d.fiches.map(f=>`<a class="sfd" href="${f[1]}" target="_blank" rel="noopener">🖨 ${f[0]}</a>`).join('')}</span>`):SFD[d.id]?(mini?`<a class="sfdmini" style="--k:${K(d)}" href="${SFD[d.id]}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Fiche SFD</a>`:`<a class="sfd" href="${SFD[d.id]}" target="_blank" rel="noopener">🖨 Fiche patient SFD — ${d.dci}</a>`):'';
+const cmark=b=>b?' aria-current="page"':'';
+
+function ordo(d){return `${d.nom} (${d.dci}) — ${d.pres}\n`+d.schema.map(s=>`${s[0]} : ${s[1]}`).join('\n')}
+const phrase=(t,id)=>t.after?`<div class="calc phrase"><div class="calc-head"><div><h3 style="font-size:18px">📋 ${t.after.h}</h3><p class="range">${t.after.sub||''}</p></div><button type="button" class="btn" onclick="copy(this,'${id}','Copier')">Copier</button></div><div class="copyrow" style="margin-top:14px"><p class="sum" id="${id}">${esc(t.after.quote)}</p><span class="note">Remplacer les [crochets] après collage.</span></div></div>`:'';
+const GI={h:'Conseils pour limiter les troubles digestifs sous Otezla',li:[
+'Respecter la montée progressive des doses sur 5 jours (boîte d\'initiation).',
+'Nausées et diarrhée surviennent surtout pendant les premières semaines et diminuent en général ensuite.',
+'Prendre les comprimés au cours d\'un repas peut améliorer la tolérance.',
+'Boire suffisamment, surtout en cas de diarrhée.',
+'Prévenir le médecin en cas de diarrhée, nausées ou vomissements importants, en particulier après 65 ans : une pause ou un arrêt peut être nécessaire.',
+'Signaler aussi une perte de poids inexpliquée, une baisse du moral ou des troubles du sommeil.']};
+function printGI(){const w=window.open('','_blank');if(!w){toast&&0;return}w.document.write(`<html><head><meta charset="utf-8"><title>Otezla – conseils</title><style>body{font:13pt/1.5 Georgia,serif;max-width:170mm;margin:15mm auto;color:#000}h1{font-size:17pt;color:#5b4636}li{margin:6px 0}.f{margin-top:20px;font:10pt system-ui;color:#555}</style></head><body><p style="font:10pt system-ui">Dr Clevy — Dermatologue — Cabinet Dermatologique Parc Mermoz, Marseille</p><h1>${GI.h}</h1><ul>${GI.li.map(x=>`<li>${x}</li>`).join('')}</ul><p class="f">À conserver avec votre traitement.</p></body></html>`);w.document.close();w.focus();w.print()}
+const giBox=()=>`<div class="info gi"><h4>${GI.h}<button type="button" class="btn" onclick="printGI()">🖨 Imprimer pour le patient</button></h4><ul>${GI.li.map(x=>`<li>${x}</li>`).join('')}</ul><p class="note">Conseils rédigés d'après le RCP (pas une fiche SFD) — à relire avant de les remettre.</p></div>`;
+const JAKBOX=(t)=>`<details class="info jakrisk"><summary><b>Anti-JAK — risque cardiovasculaire et thrombotique avant prescription</b><span class="note"> · cliquer pour afficher</span></summary>
+<div class="jr">
+<h5>1. Risque cardiovasculaire (calculateur ESC SCORE2)</h5>
+<table class="jt"><tr><th>SCORE2</th><th>Conduite</th><th>Bilan et suivi</th></tr>
+<tr><td><b>Faible</b></td><td>Anti-JAK possible</td><td>SCORE2, PA humérale, glycémie, CT et LDL : avant traitement, M6, M12 puis 1 fois / an</td></tr>
+<tr><td><b>Modéré</b></td><td>Anti-JAK possible</td><td>Suivi à M3, M6, M9, M12 puis 1 fois / an. Bilan initial : consultation de médecine vasculaire (écho-doppler TSA et artériel des MI, IPS cheville) + consultation cardiologique avec ECG ; même bilan à 1 an</td></tr>
+<tr><td><b>Élevé</b></td><td>Discussion en RCP ; si pas d'alternative : <b>réduction de dose</b></td><td>SCORE2 ou SCORE2-OP, PA, glycémie, CT et LDL : avant traitement, M3, M6, M9, M12 puis 1 fois / an. Bilan avant traitement : médecine vasculaire (ETSA, écho artérielle des MI, IPS cheville) + cardiologue avec ECG ; même bilan à 6 mois</td></tr>
+<tr><td><b>Très élevé</b></td><td colspan="2"><b>Contre-indication</b> ou discussion en RCP</td></tr></table>
+<h5>2. Risque thrombotique veineux</h5>
+<ul>
+<li>Pas de dépistage systématique de thrombophilie.</li>
+<li><b>ATCD personnel de TVP proximale ± EP :</b> éviter l'anti-JAK, ou RCP en l'absence d'alternative.</li>
+<li><b>ATCD personnel de TVP distale ou de TVS :</b> rechercher un SAPL (si présent : contre-indication en attendant l'avis du médecin vasculaire ou de l'interniste). Si thrombose avant 50 ans : rechercher une thrombophilie héréditaire (facteur V Leiden, facteur II, antithrombine, protéines C et S, NFS, TP, TCA, fibrinogène). Thrombophilie sévère : avis de l'hématologue référent, au cas par cas si pas d'alternative. Autres situations : avis du médecin vasculaire référent. Une anticoagulation préventive par AOD peut être envisagée.</li>
+<li><b>ATCD familial (1er degré) de thrombose avant 50 ans :</b> rechercher une thrombophilie héréditaire. Si sévère : avis de l'hématologue, AOD préventif envisageable. Sinon : pas de contre-indication, conseils de prévention dans les situations à risque.</li>
+<li><b>Contraception œstroprogestative ou THS oral :</b> éviter l'anti-JAK en l'absence d'alternative. CHC (pilule, patch, anneau) → progestatif oral, DIU au lévonorgestrel ou implant. THS oral → œstradiol cutané + progestérone, au cas par cas. Puis anti-JAK possible.</li>
+<li><b>Grossesse et allaitement :</b> contre-indication. Attendre 6 semaines après l'accouchement.</li>
+</ul>
+<h5>3. Facteurs de risque transitoires → suspendre l'anti-JAK pendant la période à risque</h5>
+<ul>
+<li><b>Majeurs :</b> chirurgie sous AG &gt; 30 min, fracture des membres inférieurs, immobilisation &gt; 3 jours pour un motif médical aigu (dans les 3 derniers mois).</li>
+<li><b>Mineurs :</b> chirurgie sous AG [durée à préciser], immobilisation &lt; 3 jours pour un motif médical aigu (dans les 2 derniers mois), voyage &gt; 6 h.</li>
+</ul>
+${t&&t.after?`<h5>4. ${t.after.h} — ${t.after.sub||''}</h5><div class="copyrow" style="margin:0"><p class="sum" id="ph">${esc(t.after.quote)}</p><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn" onclick="copy(this,'ph','Copier pour le dossier')">Copier pour le dossier</button><span class="note">Remplacer les [crochets] après collage.</span></div></div>`:''}
+</div></details>`;
+const steps=d=>`<dl class="steps">${d.schema.map(s=>`<dt>${s[0]}</dt><dd>${s[1]}</dd>`).join('')}</dl>`;
+function side(){
+ const t=TABS.find(x=>x.id===cur.tab);
+ let h=`<input class="num" id="q" type="search" placeholder="Rechercher une molécule…" value="${esc(q)}" autocomplete="off">`;
+ if(q){
+  const m=LIST.filter(x=>norm(x.d.nom+' '+x.d.dci+' '+x.d.cible+' '+(x.d.biosim||'')).includes(norm(q)));
+  h+=`<div class="gname">Toutes pathologies</div>`+(m.length?m.map(x=>`<a class="it" style="--k:${K(x.d)}" href="#${x.t.id}-${x.d.id}"${cmark(x.t.id===cur.tab&&x.d.id===cur.id)}><i class="dot"></i><b>${x.d.nom}</b><span>${x.d.dci}</span><em>${x.t.title}</em></a>`).join(''):'<p class="note" style="margin:8px">Aucun résultat</p>');
+ }else{
+  h+=`<a class="it ov" href="#${t.id}"${cmark(!cur.id)}>Vue d'ensemble</a>`;
+  t.groups.forEach(g=>{h+=`<div class="gname">${g.name}</div>`+g.items.map(d=>`<a class="it" style="--k:${K(d)}" href="#${t.id}-${d.id}"${cmark(d.id===cur.id)}><i class="dot"></i><b>${d.nom}</b><span>${d.dci}</span></a>`).join('')});
+ }
+ const s=$('#side');s.innerHTML=h;s.classList.toggle('searching',!!q);
+ $('#q').oninput=e=>{q=e.target.value;side();const n=$('#q');n.focus();n.setSelectionRange(q.length,q.length)};
+}
+function overview(t){
+ let h=`<div class="panel-head"><h2>${t.title}</h2><p>${t.sub||''} · touchez une molécule pour sa fiche</p></div>`;
+ (t.boxes||[]).forEach(b=>h+=`<div class="info"><h4>${b.h}</h4><ul>${b.li.map(x=>`<li>${x}</li>`).join('')}</ul></div>`);
+ const ks=[...new Set(t.groups.flatMap(g=>g.items.map(kof)))];
+ h+=`<div class="legend">${ks.map(k=>`<span class="kchip" style="--k:${KL[k][1]}"><i class="dot"></i>${KL[k][0]}</span>`).join('')}</div>`;
+ h+=`<div class="calc"><table class="ov"><tr><th style="width:19%">Molécule</th><th style="width:10%">Cible</th><th style="width:17%">Présentation</th><th>Schéma</th><th style="width:76px">Patient</th></tr>`;
+ t.groups.forEach(g=>{
+  h+=`<tr class="g"><td colspan="5">${g.name}</td></tr>`+g.items.map(d=>`<tr class="r${d.wait?' pending':''}" style="--k:${K(d)}" onclick="location.hash='${t.id}-${d.id}'"><td class="n"><span class="nm"><b>${d.nom}</b><span>${d.dci}</span></span><br><span class="amm">${d.amm}</span>${d.wait?`<br><span class="wait">${d.wait}</span>`:''}</td><td class="c">${kchip(d)}</td><td class="p">${d.pshort||d.pres}</td><td class="s">${steps(d)}</td><td class="f">${sfdLink(d,true)}</td></tr>`).join('');
+ });
+ h+=`</table></div>`;
+ t.groups.forEach(g=>{if(g.box)h+=`<div class="info"><h4>${g.box.h}</h4>${g.box.html}</div>`});
+ if(t.groups.some(g=>g.items.some(x=>kof(x)==='jak'&&x.pres&&!/crème/.test(x.cible))))h+=JAKBOX(t);
+ 
+ return h;
+}
+function detail(t,d){
+ const items=t.groups.flatMap(g=>g.items), i=items.indexOf(d), g=t.groups.find(g=>g.items.includes(d));
+ const pv=items[i-1], nx=items[i+1];
+ return `<a class="back" href="#${t.id}">← ${t.title}</a>
+ <div class="calc drug${d.wait?' pending':''}" style="--k:${K(d)}">
+  <div class="calc-head"><div><h3>${d.nom}</h3><p class="range">${d.dci} · ${g.name}</p></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="amm">${d.amm}</span>${kchip(d)}</div></div>
+  ${d.wait?`<div class="sfdtop"><span class="wait">En attente — ${d.wait}</span></div>`:''}${hasF(d)||!d.wait?`<div class="sfdtop">`:'<div hidden>'}${hasF(d)?sfdLink(d)+`<span class="note">PDF officiel ${d.fiches?'cancerdelapeau.org':'SFD'}, à imprimer (⌘P)${SFD_NOTE[d.id]?' · '+SFD_NOTE[d.id]:''}</span>`:(d.wait?'':`<span class="note">Pas de fiche patient SFD pour cette molécule.</span>`)}</div>
+  <div class="calc-body"><div>
+   <span class="label">Posologie</span><div class="region schema">${steps(d)}</div>
+  </div><div>
+   <div class="sec"><span class="label">Présentation</span>${d.pres}</div>
+   ${d.notes?`<div class="sec"><span class="label">À retenir</span><ul>${d.notes.map(n=>`<li>${n}</li>`).join('')}</ul></div>`:''}
+   ${d.biosim?`<div class="sec"><span class="label">Biosimilaires</span>${d.biosim}</div>`:''}
+  </div></div>
+  ${d.wait?'':`<div class="copyrow"><span class="label" style="margin:0">Pour l'ordonnance</span><p class="sum" id="cp">${esc(ordo(d))}</p><button type="button" class="btn" onclick="copy(this,'cp','Copier pour l\\'ordonnance')">Copier pour l'ordonnance</button></div>`}
+ </div>
+ ${d.extra==='otezla-gi'?giBox():''}
+ ${kof(d)==='jak'&&!/crème/.test(d.cible)?JAKBOX(t):''}
+ ${g.box?`<div class="info"><h4>${g.box.h}</h4>${g.box.html}</div>`:''}
+ 
+ <div class="pn"><span>${pv?`<a href="#${t.id}-${pv.id}">← ${pv.nom}</a>`:''}</span><a href="#${t.id}">Vue d'ensemble</a><span>${nx?`<a href="#${t.id}-${nx.id}">${nx.nom} →</a>`:''}</span></div>`;
+}
+function route(){
+ const h=location.hash.slice(1);
+ const t=TABS.find(x=>h===x.id||h.startsWith(x.id+'-'))||TABS[0];
+ const id=h.startsWith(t.id+'-')?h.slice(t.id.length+1):null;
+ const d=id&&t.groups.flatMap(g=>g.items).find(x=>x.id===id);
+ cur={tab:t.id,id:d?d.id:null};
+ document.documentElement.dataset.tab=t.id;
+ document.querySelectorAll('.tablist a').forEach(a=>a.toggleAttribute('aria-current',a.dataset.t===t.id)||a.dataset.t===t.id&&a.setAttribute('aria-current','page'));
+ $('#view').innerHTML=d?detail(t,d):overview(t);
+ side();window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);route();
+
+function copy(b,id,label){
+ const el=document.getElementById(id),txt=el.innerText;
+ const sel=()=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Texte sélectionné'};
+ try{navigator.clipboard.writeText(txt).then(()=>{b.textContent='Copié';setTimeout(()=>b.textContent=label,1500)},sel)}catch(_){sel()}
+}
+</script>
+</body>
+</html>

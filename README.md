@@ -1,5 +1,5 @@
-# Score Dermato
+# Scores dermatologie
 
-Calculateurs de scores dermatologiques du Dr Clevy, en ligne sur dermato-scores.netlify.app.
+Site du Dr Clevy (Cabinet Dermatologique du Parc Mermoz) : scores dermatologiques et fiches biothérapies.
 
-Aucune donnée patient dans ce site.
+Aucune donnée patient.

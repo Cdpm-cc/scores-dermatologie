@@ -1,0 +1,1369 @@
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex, nofollow"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Scores Dermatologiques</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: bandeau brun collant (titre + onglets), une carte blanche par score avec un en-tête brun où le résultat s'affiche en direct. Charte du calculateur d'isotrétinoïne : crème, brun, taupe, Georgia + system-ui. */
+:root{
+  --bg:#FAF5EE; --surface:#FFFFFF; --surface-2:#FDF8F2; --ink:#2D1B00; --muted:#8B7355; --line:#EDE0D0;
+  --gold:#D0B896; --brown-2:#3D2A10; --brown-3:#4A3520; --brown-mute:#9C8270; --cream:#FAF5EE;
+  --head:#2D1B00;
+  --accent:#2D1B00; --accent-ink:#FAF5EE; --accent-soft:#F3E9DB;
+  --ok:#22C55E; --warn:#F59E0B; --bad:#EF4444;
+  --l0-bg:rgba(208,184,150,.14); --l0-fg:#D0B896; --l0-bd:rgba(208,184,150,.4);
+  --l1-bg:rgba(34,197,94,.14); --l1-fg:#4ADE80; --l1-bd:rgba(34,197,94,.4);
+  --l2-bg:rgba(245,158,11,.14); --l2-fg:#FBBF24; --l2-bd:rgba(245,158,11,.4);
+  --l3-bg:rgba(239,68,68,.16); --l3-fg:#F87171; --l3-bd:rgba(239,68,68,.45);
+  --l4-bg:rgba(239,68,68,.28); --l4-fg:#FCA5A5; --l4-bd:rgba(239,68,68,.6);
+  --skin:#F1D3BD; --skin-edge:#D9AD8F; --hair:#3B2A20; --hair-2:#5A4132;
+  --font-display:Georgia, "Times New Roman", serif;
+  --font-body:Georgia, "Times New Roman", serif;
+  --font-ui:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-data:Georgia, "Times New Roman", serif;
+  --top-h:112px;
+  color-scheme:light;
+}
+
+/* une palette par onglet (isotrétinoïne garde le brun d’origine) */
+:root[data-tab="risquecv"]{--head:#7A1E24; --ink:#33090C; --muted:#A04A4F; --gold:#F0C2C2; --bg:#FCF4F3; --line:#F0DAD8; --surface-2:#FEF9F8; --accent-soft:#F8E4E2}
+:root[data-tab="dlqi"]{--head:#5B2A4E; --ink:#2E1428; --muted:#8A5A7C; --gold:#E8C7DC; --bg:#FAF4F8; --line:#EEDDE8; --surface-2:#FDF8FB; --accent-soft:#F4E4EE}
+:root[data-tab="psoriasis"]{--head:#8A3B22; --ink:#3A1608; --muted:#A85A3C; --gold:#F2C9B3; --bg:#FCF5F1; --line:#F1DCCF; --surface-2:#FEF9F6; --accent-soft:#F8E5DA}
+:root[data-tab="dermatite"]{--head:#3F5A2A; --ink:#1C2810; --muted:#6A7F4B; --gold:#D3DFB4; --bg:#F6F8F0; --line:#E1E8D2; --surface-2:#FBFCF7; --accent-soft:#EAF0DD}
+:root[data-tab="verneuil"]{--head:#1F5559; --ink:#0D272A; --muted:#4A7F82; --gold:#B5DCDC; --bg:#F2F8F8; --line:#D6E7E6; --surface-2:#F8FCFC; --accent-soft:#E0EFEE}
+:root[data-tab="pelade"]{--head:#2F4170; --ink:#141E36; --muted:#5A6D98; --gold:#C3CFEA; --bg:#F4F6FB; --line:#DCE2F0; --surface-2:#F9FAFD; --accent-soft:#E5EAF6}
+:root[data-tab="urticaire"]{--head:#8C3048; --ink:#3A0F1A; --muted:#A6566A; --gold:#F3C3CE; --bg:#FCF4F6; --line:#F1DAE0; --surface-2:#FEF9FA; --accent-soft:#F8E3E8}
+:root[data-tab="depression"]{--head:#4B3F7A; --ink:#211B38; --muted:#716A99; --gold:#D3CEF0; --bg:#F6F5FB; --line:#E2DFF0; --surface-2:#FAF9FD; --accent-soft:#EBE8F6}
+body, .top, .calc-head, body::before{transition:background-color .35s ease, color .35s ease}
+.tablist a{display:flex; align-items:center; gap:7px}
+.tablist a::before{flex-shrink:0}
+@media (max-width:600px){ .top .tablist{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:5px} .top .tabrow{display:contents} .top .tablist a{font-size:11px; padding:5px 4px; border-radius:14px} .top .tablist a::before{display:none} }
+.tablist a::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--dot); box-shadow:0 0 0 1.5px rgba(255,255,255,.35)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:15px; line-height:1.5}
+body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:30; background:var(--head)}
+.wrap{max-width:1180px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:normal; text-wrap:balance; margin:0; line-height:1.2}
+p{margin:0}
+.mono{font-variant-numeric:tabular-nums}
+
+/* bandeau */
+.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--head); box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 6px 18px -12px rgba(0,0,0,.45)}
+.top .wrap{padding-block:14px 10px; display:flex; flex-direction:column; gap:10px}
+.eyebrow{display:block; font-family:var(--font-ui); font-size:9px; letter-spacing:4px; text-transform:uppercase; color:var(--muted)}
+.top h1{font-size:19px; color:var(--cream); letter-spacing:-0.3px}
+.top .byline{margin:3px 0 0; font-family:var(--font-ui); font-size:11px; letter-spacing:0.3px; color:var(--gold); opacity:.85}
+.tablist{display:flex; flex-direction:column; gap:6px; width:100%}
+.tabrow{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:6px}
+.tablist::-webkit-scrollbar{display:none}
+.tablist a{min-width:0; min-height:34px; justify-content:center; text-align:center; line-height:1.15; text-decoration:none; font-family:var(--font-ui); font-size:12px; font-weight:600; padding:6px 10px; border-radius:20px; border:1.5px solid rgba(255,255,255,.22); color:var(--gold); background:rgba(255,255,255,.06)}
+.tablist a:hover{color:var(--cream); border-color:rgba(255,255,255,.45)}
+.tablist a[aria-current="page"]{background:var(--cream); color:var(--head); border-color:var(--cream)}
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{outline:2px solid var(--muted); outline-offset:2px}
+
+main .wrap{padding-block:20px 40px; display:flex; flex-direction:column; gap:18px}
+.panel{display:flex; flex-direction:column; gap:14px}
+.panel-head{display:flex; flex-direction:column; gap:4px}
+.panel-head h2{font-size:22px}
+.panel-head p{font-family:var(--font-ui); font-size:13px; color:var(--muted); max-width:65ch}
+
+/* carte de score */
+.calc{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px -16px rgba(0,0,0,.18); display:flex; flex-direction:column}
+.calc-head{position:sticky; top:calc(env(safe-area-inset-top,0px) + var(--top-h)); z-index:10; background:var(--head); color:var(--cream); box-shadow:inset 0 1px 0 rgba(255,255,255,.08); border-radius:16px 16px 0 0; padding:14px 18px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px}
+.calc-head h3{font-size:19px; color:var(--cream)}
+.calc-head .range{font-family:var(--font-ui); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold)}
+.score{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+.score output{font-family:var(--font-data); font-variant-numeric:tabular-nums; font-size:30px; font-weight:bold; line-height:1; min-width:2ch; text-align:right; color:#FFFFFF}
+.chip{display:inline-flex; align-items:center; font-family:var(--font-ui); font-size:12px; font-weight:600; padding:5px 11px; border-radius:8px; border:1px solid transparent; white-space:nowrap}
+.lvl-0{background:var(--l0-bg); color:var(--l0-fg); border-color:var(--l0-bd)}
+.lvl-1{background:var(--l1-bg); color:var(--l1-fg); border-color:var(--l1-bd)}
+.lvl-2{background:var(--l2-bg); color:var(--l2-fg); border-color:var(--l2-bd)}
+.lvl-3{background:var(--l3-bg); color:var(--l3-fg); border-color:var(--l3-bd)}
+.lvl-4{background:var(--l4-bg); color:var(--l4-fg); border-color:var(--l4-bd)}
+.calc-body{padding:18px 20px; display:flex; flex-direction:column; gap:16px}
+.detail{font-family:var(--font-ui); font-size:12px; color:var(--gold); width:100%; display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px}
+.detail b{color:var(--cream); font-family:var(--font-data); font-size:14px}
+.calc-foot{padding:0 20px 18px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px}
+.note{font-family:var(--font-ui); font-size:12px; color:var(--muted); max-width:70ch}
+.btn-ghost{font-family:var(--font-ui); font-size:12px; font-weight:600; color:var(--muted); background:transparent; border:1.5px solid var(--line); border-radius:10px; padding:7px 14px; cursor:pointer}
+.btn-ghost:hover{color:var(--ink); border-color:var(--gold)}
+.btn{font-family:var(--font-ui); font-weight:700; font-size:12px; border:none; color:var(--cream); background:var(--head); border-radius:20px; padding:9px 18px; cursor:pointer; align-self:flex-start}
+
+.grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap:12px}
+.region{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px; min-width:0}
+.region-head{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
+.region-head h4{font-size:15px; font-weight:bold}
+.region-head .sub{font-family:var(--font-ui); font-size:11px; color:var(--muted)}
+
+/* choix en pastilles */
+fieldset.seg{border:0; margin:0; padding:0; min-width:0; display:flex; flex-direction:column; gap:5px}
+fieldset.seg legend{padding:0; font-family:var(--font-ui); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:6px}
+.opts{display:flex; flex-wrap:wrap; gap:5px}
+.opts.fill > label{flex:1 1 0; min-width:0}
+.opts > label{position:relative; cursor:pointer}
+.opts input{position:absolute; opacity:0; width:1px; height:1px; pointer-events:none}
+.opts span{display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:38px; padding:4px 12px; border:1.5px solid var(--line); border-radius:20px; background:transparent; color:var(--muted); text-align:center; line-height:1.15; transition:background .12s, color .12s}
+.opts.fill span{padding:4px 2px; border-radius:12px}
+.opts span b{font-family:var(--font-ui); font-weight:600; font-size:13px}
+.opts span small{font-family:var(--font-ui); font-size:9.5px; color:var(--muted); white-space:nowrap}
+.opts > label:hover span{border-color:var(--gold)}
+.opts input:checked + span{background:var(--head); border-color:var(--head); color:var(--cream); box-shadow:0 2px 6px -2px rgba(0,0,0,.35)}
+.opts input:checked + span small{color:var(--gold)}
+.opts input:focus-visible + span{outline:2px solid var(--muted); outline-offset:2px}
+
+.list{display:flex; flex-direction:column; gap:6px}
+.list > label{position:relative; cursor:pointer}
+.list input{position:absolute; opacity:0; width:1px; height:1px}
+.list span{display:grid; grid-template-columns:auto 1fr; gap:2px 12px; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--surface-2)}
+.list span b{font-size:16px; grid-row:span 2; align-self:center; min-width:2.5ch; color:var(--muted)}
+.list span em{font-style:normal; font-weight:bold}
+.list span small{font-family:var(--font-ui); color:var(--muted); font-size:12.5px}
+.list input:checked + span{border-color:var(--head); background:var(--head); color:var(--cream)}
+.list input:checked + span b, .list input:checked + span small{color:var(--gold)}
+.list input:focus-visible + span{outline:2px solid var(--muted); outline-offset:2px}
+
+/* champs */
+.fields{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap:12px}
+.field{display:flex; flex-direction:column; gap:5px; min-width:0}
+.field label{font-family:var(--font-ui); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted)}
+.field label .w{color:var(--ink); letter-spacing:0}
+input.num, select.num{font-family:var(--font-data); font-variant-numeric:tabular-nums; font-size:15px; width:100%; min-width:0; padding:10px 12px; border:1.5px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); outline:none}
+input.num:focus, select.num:focus{border-color:var(--muted)}
+select.num{appearance:none; -webkit-appearance:none}
+.unit{display:flex; align-items:center; gap:8px}
+.unit > span{font-family:var(--font-ui); font-size:13px; color:var(--muted); white-space:nowrap}
+.stepper{display:grid; grid-template-columns:44px 1fr 44px; gap:6px}
+.stepper button{font-family:var(--font-ui); font-size:20px; line-height:1; border:1.5px solid var(--line); border-radius:8px; background:var(--surface-2); color:var(--ink); cursor:pointer}
+.stepper button:hover{border-color:var(--gold)}
+.stepper input{text-align:center}
+.range-row{display:grid; grid-template-columns:1fr 3.2ch; align-items:center; gap:12px}
+.range-row input[type=range]{width:100%; accent-color:var(--muted)}
+.range-row output{font-size:17px; font-weight:bold; text-align:right}
+
+.badges{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.badge{font-family:var(--font-ui); font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; border:1.5px solid var(--line); color:var(--muted)}
+.badge.on{background:#DCFCE7; color:#15803D; border-color:#86EFAC}
+.badges .note b{color:var(--ink)}
+
+.sub-title{font-family:var(--font-ui); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted)}
+.legend-box{background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-family:var(--font-ui); font-size:12px; color:var(--muted); display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap:6px 18px}
+.legend-box b{color:var(--ink)}
+
+/* UAS7 */
+.days{display:flex; flex-direction:column; gap:8px}
+.day{display:grid; grid-template-columns:3ch 1fr 1fr 3.5ch; gap:10px; align-items:end; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2)}
+.day > .d{font-weight:bold; align-self:center; color:var(--muted)}
+.day > .s{font-weight:bold; text-align:right; align-self:center}
+@media (max-width:520px){
+  .day{grid-template-columns:3ch 1fr 3.5ch}
+  .day > fieldset:nth-of-type(2){grid-column:2}
+}
+
+/* Règle des 10 */
+.ten{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
+.ten div{background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:2px}
+.ten small{font-family:var(--font-ui); color:var(--muted); font-size:10.5px}
+.ten b{font-size:20px}
+.ten .over b{color:var(--bad)}
+
+/* Isotrétinoïne : reprise du calculateur */
+.stack{display:flex; flex-direction:column; gap:14px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 20px; box-shadow:0 1px 6px rgba(139,115,85,.08); display:flex; flex-direction:column; gap:10px}
+.label{font-family:var(--font-ui); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted)}
+input.num.big{font-size:18px}
+.two{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+.mini{padding:10px 12px; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; display:flex; flex-direction:column; gap:3px; min-width:0}
+.mini small{font-family:var(--font-ui); font-size:10.5px; color:var(--muted)}
+.mini > b{font-size:16px}
+.kvl{display:flex; justify-content:space-between; align-items:baseline; gap:6px}
+.kvl span{font-family:var(--font-ui); font-size:10.5px; color:var(--muted)}
+.kvl b{font-size:15px}
+.kvl b.s{font-size:12px; text-align:right}
+.presets{display:flex; gap:6px; flex-wrap:wrap}
+.pill{font-family:var(--font-ui); font-size:11.5px; font-weight:600; padding:6px 11px; border-radius:20px; border:1.5px solid var(--line); background:transparent; color:var(--muted); cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--head); color:var(--cream); border-color:var(--head)}
+.cycles{display:flex; flex-direction:column; gap:10px}
+.cycle{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px}
+.cycle-head{display:flex; align-items:center; justify-content:space-between; min-height:26px}
+.cn{font-family:var(--font-ui); font-size:12px; font-weight:700; color:var(--muted)}
+.cycle .rm{width:28px; height:28px; border-radius:50%; border:1px solid var(--line); background:var(--surface); color:#A0703F; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0}
+.cycle-grid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; align-items:end}
+@media (max-width:440px){ .cycle-grid{grid-template-columns:repeat(2, minmax(0,1fr))} }
+.f{display:flex; flex-direction:column; gap:3px; min-width:0}
+.f small{font-family:var(--font-ui); font-size:10.5px; color:var(--muted)}
+.tot{padding:10px; background:var(--line); border-radius:8px; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.add{width:100%; padding:10px; border-radius:8px; border:1.5px dashed var(--gold); background:transparent; color:var(--muted); font-family:var(--font-ui); font-size:12.5px; font-weight:600; cursor:pointer}
+.result{background:var(--ink); color:#FFFFFF; border-radius:16px; padding:22px; display:flex; flex-direction:column; gap:14px}
+.rlabel{font-family:var(--font-ui); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold)}
+.rtop{display:flex; align-items:center; gap:20px; flex-wrap:wrap}
+.ring{position:relative; width:120px; height:120px; flex-shrink:0}
+.ring svg{transform:rotate(-90deg); display:block}
+.ring .c{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
+.ring .c b{font-size:22px; line-height:1}
+.ring .c small{font-family:var(--font-ui); font-size:10px; color:var(--gold)}
+.rinfo{flex:1; min-width:170px; display:flex; flex-direction:column; gap:8px}
+.rmg{font-size:24px; font-weight:bold}
+.rmg span{font-size:13px; font-weight:normal; color:var(--gold)}
+.status{padding:7px 12px; border-radius:8px; border:1px solid; font-family:var(--font-ui); font-size:12px; font-weight:600}
+.rbar{height:6px; background:var(--brown-3); border-radius:3px; position:relative; overflow:hidden}
+.rbar .win{position:absolute; left:60%; width:15%; top:0; bottom:0; background:rgba(34,197,94,.22)}
+.rbar .fill{position:absolute; left:0; top:0; bottom:0; border-radius:3px; transition:width .5s ease}
+.rticks{position:relative; height:12px; font-family:var(--font-ui); font-size:9px; color:var(--brown-mute)}
+.rticks span{position:absolute; top:0; transform:translateX(-50%)}
+.rticks span.l{left:0; transform:none}
+.rticks span.r{right:0; transform:none}
+.rbox{background:var(--brown-2); border-radius:10px; overflow:hidden}
+.rbox-h{padding:10px 16px 6px; font-family:var(--font-ui); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--brown-mute)}
+.rrow{padding:12px 16px; border-top:1px solid var(--brown-3); display:flex; flex-direction:column; gap:8px}
+.rrow-h{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.rt{font-family:var(--font-ui); font-size:12px; font-weight:700; min-width:70px}
+.rrow-h b{font-size:15px}
+.mut{font-family:var(--font-ui); font-size:10.5px; color:var(--brown-mute)}
+.rgrid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:6px}
+.rgrid div{background:var(--ink); border-radius:8px; padding:8px 6px; text-align:center; display:flex; flex-direction:column; gap:2px; min-width:0}
+.rgrid b{font-size:18px; line-height:1.3}
+.rgrid b.s{font-size:12px}
+.rgrid small{font-family:var(--font-ui); font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--brown-mute)}
+.okt{font-family:var(--font-ui); font-size:13px; color:var(--ok)}
+.sim{display:grid; grid-template-columns:72px 1fr 1fr; gap:4px; padding:8px 16px; border-top:1px solid var(--brown-3); align-items:center; text-align:center}
+.sim > :first-child{text-align:left}
+.sim-h{padding-block:6px; font-family:var(--font-ui); font-size:9px; text-transform:uppercase; color:var(--brown-mute)}
+.sim.cur{background:#4A2E10}
+.sd{font-family:var(--font-ui); font-size:13px; font-weight:bold; color:#C0A080}
+.sim.cur .sd{color:var(--cream)}
+.sim b{display:block; font-size:12px}
+.sim small{font-family:var(--font-ui); font-size:9px; color:var(--brown-mute)}
+
+/* dépression */
+.qs2{display:flex; flex-direction:column; gap:16px}
+@media (min-width:720px){ .qs2{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px 24px} }
+.alert{background:#FEF2F2; border:1.5px solid var(--bad); border-radius:10px; padding:12px 14px; font-family:var(--font-ui); font-size:13px; font-weight:600; color:#991B1B}
+
+/* DLQI : question à poser */
+.qhint{font-style:italic; font-size:12.5px; color:var(--muted); margin:-2px 0 4px; line-height:1.4}
+
+/* impression */
+.btn-print{align-self:flex-start; margin-top:6px; font-family:var(--font-ui); font-size:12px; font-weight:600; color:var(--ink); background:var(--surface); border:1.5px solid var(--line); border-radius:20px; padding:7px 14px; cursor:pointer}
+.btn-print:hover{border-color:var(--gold)}
+.print-date{display:none}
+@media print{
+  *{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+  @page{margin:12mm}
+  body{background:#FFFFFF; font-size:13px}
+  body::before{display:none}
+  .top{position:static}
+  .top .wrap{padding-block:8px}
+  .tablist, .btn-print, .btn-ghost, .copy, .add, .cycle .rm, footer{display:none!important}
+  .calc-head, .col-r{position:static!important}
+  .calc, .card{box-shadow:none}
+  .region, .day, .copyrow, .result, .rbox, .rrow, .sim, fieldset.seg, .list > label, .zone, .decide, .vrow{break-inside:avoid}
+  .stack{display:flex!important; flex-direction:column}
+  main .wrap{padding-block:6px; max-width:none}
+  .print-date{display:block; font-family:var(--font-ui); font-size:11px; color:var(--muted)}
+}
+
+/* NAPSI */
+.nails{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap:10px}
+.nail{padding:10px; gap:8px}
+.nail .opts.fill span{min-height:32px}
+
+/* simulation isotrétinoïne */
+.simhead{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px; padding-bottom:10px}
+.simsel{display:flex; align-items:center; gap:8px; text-transform:none; letter-spacing:0}
+.simsel span{font-size:10px; text-transform:uppercase; letter-spacing:1px}
+.simsel select{font-family:var(--font-ui); font-size:12.5px; font-weight:600; color:var(--cream); background:var(--ink); border:1px solid var(--brown-3); border-radius:8px; padding:6px 10px; cursor:pointer}
+.sd .pres{display:block; font-size:9px; font-weight:600; color:var(--gold); text-transform:uppercase; letter-spacing:.5px}
+
+.sr-lab{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+#cv_regbox{margin-top:6px}
+
+/* copier pour le dossier */
+.copyrow{margin:0 20px 14px; background:var(--accent-soft); border:1px solid var(--line); border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:10px}
+.copyrow .sum{font-size:14px; line-height:1.5}
+
+/* ordinateur */
+.col{display:flex; flex-direction:column; gap:14px; min-width:0}
+@media (min-width:720px){
+  .grid.regions{grid-template-columns:repeat(2, minmax(0,1fr))}
+  #dlqi_qs{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px 24px}
+  #sc_items{grid-template-columns:repeat(3, minmax(0,1fr))}
+}
+@media (min-width:980px){
+  .top .wrap{flex-direction:row; align-items:center; justify-content:space-between; gap:24px; padding-block:12px}
+  .tablist{width:720px; flex-shrink:0}
+  .stack{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:14px; align-items:start}
+  .col-r{position:sticky; top:calc(env(safe-area-inset-top,0px) + var(--top-h) + 14px)}
+  .days{display:grid; grid-template-columns:repeat(2, minmax(0,1fr))}
+  #salt-app .zones{grid-template-columns:repeat(2, minmax(0,1fr))}
+}
+@media (min-width:1140px){
+  .grid.regions{grid-template-columns:repeat(4, minmax(0,1fr))}
+}
+
+footer .wrap{padding-block:0 32px; font-family:var(--font-ui); color:var(--muted); font-size:11.5px}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+
+/* SALT (pelade) */
+#salt-app .sbar{width:100%; height:6px; border-radius:3px; background:rgba(255,255,255,.15); overflow:hidden}
+#salt-app .sbar i{display:block; height:100%; width:0; background:var(--gold); transition:width .15s}
+#salt-app .setup{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px}
+#salt-app .setup label{font-weight:600; font-size:14px}
+#salt-app .zones{display:grid; gap:12px}
+@media (min-width:760px){ #salt-app .zones{grid-template-columns:1fr 1fr} }
+#salt-app .zone{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:12px; display:grid; grid-template-columns:140px minmax(0,1fr); gap:8px 14px; align-items:center; min-width:0}
+#salt-app .zone svg{width:140px; height:auto; display:block; touch-action:none; cursor:pointer}
+#salt-app .side{display:grid; gap:4px; min-width:0}
+#salt-app .zone h4{font-size:16px}
+#salt-app .w{font-family:var(--font-data); font-size:11.5px; color:var(--muted)}
+#salt-app .pct{font-family:var(--font-data); font-size:24px; font-weight:bold; font-variant-numeric:tabular-nums; line-height:1.1}
+#salt-app .pct small{font-size:13px; color:var(--muted); font-weight:500}
+#salt-app .mode{font-family:var(--font-ui); font-size:11px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:.06em}
+#salt-app input[type=range]{width:100%; accent-color:var(--accent); height:28px; margin:0}
+#salt-app input[type=range]:disabled{opacity:.35}
+#salt-app .steps{display:flex; gap:6px}
+#salt-app .qsel{font-family:var(--font-ui); font-size:12.5px; font-weight:600; color:var(--muted)}
+#salt-app .contrib{font-size:12.5px; color:var(--muted); font-family:var(--font-data); font-variant-numeric:tabular-nums}
+#salt-app .plaques{grid-column:1/-1; display:grid; gap:6px; border-top:1px solid var(--line); padding-top:8px}
+#salt-app .prow{display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:14px}
+#salt-app .prow input{width:3.8em; font:inherit; font-family:var(--font-data); padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink); text-align:right}
+#salt-app .prow .area{margin-left:auto; font-family:var(--font-data); font-size:12px; color:var(--muted)}
+#salt-app .ptot{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+#salt-app button.sm{font-family:var(--font-ui); font-size:12px; font-weight:600; padding:5px 12px; border-radius:20px; background:transparent; color:var(--muted); border:1.5px solid var(--line); cursor:pointer}
+#salt-app button.sm:hover{border-color:var(--accent)}
+#salt-app .decide{border:1px solid var(--line); border-radius:12px; padding:14px; display:grid; gap:12px}
+#salt-app .decide fieldset{border:0; padding:0; margin:0; display:grid; gap:6px}
+#salt-app .decide legend{font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:4px}
+#salt-app .decide label{display:flex; gap:10px; align-items:flex-start; font-size:14.5px; cursor:pointer}
+#salt-app .decide input[type=checkbox], #salt-app input[type=range]{accent-color:var(--muted)}
+#salt-app .setup label{font-family:var(--font-ui); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted)}
+#salt-app .decide input[type=checkbox]{width:20px; height:20px; flex:none; margin-top:2px; accent-color:var(--accent)}
+#salt-app .verdict{display:grid; gap:8px}
+#salt-app .vrow{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; align-items:start; padding:10px 12px; border-radius:10px; border:1px solid var(--line)}
+#salt-app .vrow b{font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding-top:3px}
+#salt-app .vrow span{font-weight:600}
+#salt-app .vrow small{grid-column:2; color:var(--muted); font-size:13px; font-weight:400}
+#salt-app .vrow.yes{border-color:var(--bad); background:#FEF2F2}
+#salt-app .vrow.wait{border-color:var(--warn); background:#FFFBEB}
+#salt-app .out{background:var(--accent-soft); border-radius:12px; padding:14px; display:grid; gap:10px}
+#salt-app .out p{font-size:14.5px}
+#salt-app .btns{display:flex; gap:10px; flex-wrap:wrap}
+#salt-app .ref{display:grid; gap:6px}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div><h1>Scores Dermatologiques</h1><p class="byline">Par Dr Céline Clevy – Cabinet Dermatologique du Parc Mermoz</p></div>
+    <nav class="tablist" aria-label="Pathologies">
+      <div class="tabrow">
+      <a href="#isotretinoine" style="--dot:#C8A57A">Isotrétinoïne</a>
+      <a href="#dlqi" style="--dot:#C98BB0">DLQI</a>
+      <a href="#depression" style="--dot:#9C95C8">Dépression</a>
+      <a href="#risquecv" style="--dot:#D9574F">Risque CV</a>
+      <a href="#psoriasis" style="--dot:#D9835C">Psoriasis</a>
+      </div>
+      <div class="tabrow">
+      <a href="#dermatite" style="--dot:#9CB06B">Dermatite atopique</a>
+      <a href="#verneuil" style="--dot:#6FAAAD">Verneuil</a>
+      <a href="#pelade" style="--dot:#8798C4">Pelade</a>
+      <a href="#urticaire" style="--dot:#D27A8B">Urticaire</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main><div class="wrap">
+<p class="print-date" id="print_date"></p>
+
+<!-- PSORIASIS -->
+<section class="panel" data-route="psoriasis" hidden>
+  <div class="panel-head"><h2>Psoriasis</h2><p>PASI, surface corporelle atteinte, IGA, NAPSI et règle des 10.</p><button type="button" class="btn-print" hidden>Imprimer ou enregistrer en PDF</button></div>
+
+  <form class="calc" data-calc="pasi" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>PASI</h3><p class="range">0 – 72</p></div>
+      <div class="score"><output id="pasi_out">0</output><span class="chip lvl-0" id="pasi_chip">Blanchi</span></div>
+    </div>
+    <div class="calc-body">
+      <div class="grid regions" id="pasi_regions"></div>
+      <div class="fields">
+        <div class="field"><label for="pasi_base">PASI initial (optionnel)</label><input class="num" id="pasi_base" inputmode="decimal" placeholder="ex. 18,4"></div>
+        <div class="field" style="justify-content:flex-end"><div class="badges" id="pasi_resp"><span class="note">Saisir le PASI initial pour calculer la réponse.</span></div></div>
+      </div>
+    </div>
+    <div class="copyrow"><p class="sum" id="pasi_sum"></p><button type="button" class="btn copy" data-sum="pasi_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Sévérité 0 à 4 par signe. Surface : 0 = 0 %, 1 = &lt;10 %, 2 = 10–29 %, 3 = 30–49 %, 4 = 50–69 %, 5 = 70–89 %, 6 = 90–100 %.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+
+  <form class="calc" data-calc="bsa" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>Surface atteinte (BSA)</h3><p class="range">% surface corporelle</p></div>
+      <div class="score"><output id="bsa_out">0 %</output><span class="chip lvl-0" id="bsa_chip">Aucune</span></div>
+    </div>
+    <div class="calc-body">
+      <div class="fields">
+        <div class="field"><label for="bsa_p">Nombre de paumes du patient (doigts inclus)</label>
+          <div class="stepper"><button type="button" class="step" data-for="bsa_p" data-d="-1" aria-label="Retirer une paume">−</button><input class="num" id="bsa_p" inputmode="decimal" value="0"><button type="button" class="step" data-for="bsa_p" data-d="1" aria-label="Ajouter une paume">+</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="copyrow"><p class="sum" id="bsa_sum"></p><button type="button" class="btn copy" data-sum="bsa_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">1 paume ≈ 1 % de surface corporelle. Repères : &lt; 3 % léger, 3–10 % modéré, &gt; 10 % étendu.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+
+  <form class="calc" data-calc="iga" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>IGA</h3><p class="range">Évaluation globale de l’investigateur · 0 – 4</p></div>
+      <div class="score"><output id="iga_out">—</output><span class="chip lvl-0" id="iga_chip">Non renseigné</span></div>
+    </div>
+    <div class="calc-body"><div class="list" id="iga_list"></div></div>
+    <div class="copyrow"><p class="sum" id="iga_sum"></p><button type="button" class="btn copy" data-sum="iga_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">IGA 0 ou 1 : critère de succès habituel des essais.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+
+  <form class="calc" data-calc="napsi" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>NAPSI</h3><p class="range" id="napsi_range">0 – 80 · 10 ongles des mains</p></div>
+      <div class="score"><output id="napsi_out">0</output><span class="chip lvl-0" id="napsi_chip">0 ongle atteint</span></div>
+      <div class="detail"><span>Matrice <b id="napsi_m">0</b></span><span>Lit unguéal <b id="napsi_l">0</b></span></div>
+    </div>
+    <div class="calc-body">
+      <fieldset class="seg"><legend>Ongles évalués</legend><div class="opts text">
+        <label><input type="radio" name="napsi_scope" id="napsi_scope_h" value="h" checked><span><b>Mains (10)</b></span></label>
+        <label><input type="radio" name="napsi_scope" id="napsi_scope_hf" value="hf"><span><b>Mains et pieds (20)</b></span></label>
+      </div></fieldset>
+      <div class="legend-box">
+        <div><b>Matrice</b> : nombre de quadrants (0 à 4) avec au moins un signe : ponctuations en dé à coudre, leuconychie, taches rouges de la lunule, effritement de la tablette.</div>
+        <div><b>Lit unguéal</b> : nombre de quadrants (0 à 4) avec au moins un signe : onycholyse, hémorragies en flammèches, hyperkératose sous-unguéale, tache saumonée (« tache d’huile »).</div>
+      </div>
+      <p class="sub-title">Main droite</p><div class="nails" id="napsi_hd"></div>
+      <p class="sub-title">Main gauche</p><div class="nails" id="napsi_hg"></div>
+      <div id="napsi_feet" hidden>
+        <div style="display:flex; flex-direction:column; gap:16px">
+          <p class="sub-title">Pied droit</p><div class="nails" id="napsi_pd"></div>
+          <p class="sub-title">Pied gauche</p><div class="nails" id="napsi_pg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="copyrow"><p class="sum" id="napsi_sum"></p><button type="button" class="btn copy" data-sum="napsi_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Chaque ongle est divisé en 4 quadrants. Score par ongle = matrice + lit, de 0 à 8. Total 0 à 80 pour les mains, 0 à 160 avec les pieds. Pas de seuil de sévérité validé : le NAPSI sert surtout au suivi.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+
+  <section class="calc" aria-labelledby="ten_t" style="background:var(--surface); border:1px solid var(--line); border-radius:16px">
+    <div class="calc-head" style="position:static">
+      <div><h3 id="ten_t">Règle des 10</h3><p class="range">PASI · BSA · DLQI</p></div>
+      <div class="score"><span class="chip lvl-0" id="ten_chip">Aucun critère &gt; 10</span></div>
+    </div>
+    <div class="calc-body">
+      <div class="ten">
+        <div id="ten_pasi"><small>PASI</small><b>0</b></div>
+        <div id="ten_bsa"><small>BSA</small><b>0 %</b></div>
+        <div id="ten_dlqi"><small>DLQI</small><b>—</b></div>
+      </div>
+      <p class="note">Reprend les valeurs saisies ci-dessus et dans l’onglet DLQI.</p>
+      <div class="copyrow" style="margin:0"><p class="sum" id="ten_sum"></p><button type="button" class="btn copy" data-sum="ten_sum">Copier pour le dossier</button></div>
+    </div>
+  </section>
+</section>
+
+<!-- DERMATITE ATOPIQUE -->
+<section class="panel" data-route="dermatite" hidden>
+  <div class="panel-head"><h2>Dermatite atopique</h2><p>SCORAD et EASI.</p><button type="button" class="btn-print" hidden>Imprimer ou enregistrer en PDF</button></div>
+
+  <form class="calc" data-calc="scorad" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>SCORAD</h3><p class="range">0 – 103</p></div>
+      <div class="score"><output id="scorad_out">0</output><span class="chip lvl-1" id="scorad_chip">Léger</span></div>
+      <div class="detail"><span>A étendue <b id="sc_a">0</b></span><span>B intensité <b id="sc_b">0</b></span><span>C symptômes <b id="sc_c">0</b></span><span>SCORAD objectif <b id="sc_o">0</b></span><span class="chip lvl-1" id="sc_o_chip">Léger</span></div>
+    </div>
+    <div class="calc-body">
+      <fieldset class="seg"><legend>Âge</legend><div class="opts text">
+        <label><input type="radio" name="sc_age" id="sc_age_a" value="a" checked><span><b>2 ans et plus</b></span></label>
+        <label><input type="radio" name="sc_age" id="sc_age_e" value="e"><span><b>Moins de 2 ans</b></span></label>
+      </div></fieldset>
+      <p class="sub-title">A · Étendue : % atteint de chaque région</p>
+      <div class="fields" id="sc_regions"></div>
+      <p class="sub-title">B · Intensité (zone représentative)</p>
+      <div class="grid" id="sc_items"></div>
+      <p class="sub-title">C · Symptômes (moyenne des 3 derniers jours ou nuits)</p>
+      <div class="fields">
+        <div class="field"><label for="sc_pr">Prurit (0 – 10)</label><div class="range-row"><input type="range" id="sc_pr" min="0" max="10" step="1" value="0"><output id="sc_pr_v" for="sc_pr">0</output></div></div>
+        <div class="field"><label for="sc_sl">Perte de sommeil (0 – 10)</label><div class="range-row"><input type="range" id="sc_sl" min="0" max="10" step="1" value="0"><output id="sc_sl_v" for="sc_sl">0</output></div></div>
+      </div>
+    </div>
+    <div class="copyrow"><p class="sum" id="scorad_sum"></p><button type="button" class="btn copy" data-sum="scorad_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">SCORAD = A/5 + 7B/2 + C. Repères : &lt; 25 léger, 25–50 modéré, &gt; 50 sévère. SCORAD objectif : &lt; 15 léger, 15–40 modéré, &gt; 40 sévère.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+
+  <form class="calc" data-calc="easi" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>EASI</h3><p class="range">0 – 72</p></div>
+      <div class="score"><output id="easi_out">0</output><span class="chip lvl-0" id="easi_chip">Blanchi</span></div>
+    </div>
+    <div class="calc-body">
+      <fieldset class="seg"><legend>Âge</legend><div class="opts text">
+        <label><input type="radio" name="easi_age" id="easi_age_a" value="a" checked><span><b>8 ans et plus</b></span></label>
+        <label><input type="radio" name="easi_age" id="easi_age_e" value="e"><span><b>0 – 7 ans</b></span></label>
+      </div></fieldset>
+      <div class="grid regions" id="easi_regions"></div>
+      <div class="fields">
+        <div class="field"><label for="easi_base">EASI initial (optionnel)</label><input class="num" id="easi_base" inputmode="decimal" placeholder="ex. 24,6"></div>
+        <div class="field" style="justify-content:flex-end"><div class="badges" id="easi_resp"><span class="note">Saisir l’EASI initial pour calculer la réponse.</span></div></div>
+      </div>
+    </div>
+    <div class="copyrow"><p class="sum" id="easi_sum"></p><button type="button" class="btn copy" data-sum="easi_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Signes 0 à 3, demi-points autorisés. Repères : 0 blanchi, 0,1–1 presque blanchi, 1,1–7 léger, 7,1–21 modéré, 21,1–50 sévère, 50,1–72 très sévère.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+</section>
+
+<!-- DLQI -->
+<section class="panel" data-route="dlqi" hidden>
+  <div class="panel-head"><h2>DLQI</h2><p>Saisir les réponses du questionnaire rempli par le patient, portant sur les 7 derniers jours. Sous chaque item, une formulation de la question à poser (reformulée, ce n’est pas le texte officiel du DLQI).</p><button type="button" class="btn-print" hidden>Imprimer ou enregistrer en PDF</button></div>
+  <form class="calc" data-calc="dlqi" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>DLQI</h3><p class="range">0 – 30</p></div>
+      <div class="score"><output id="dlqi_out">—</output><span class="chip lvl-0" id="dlqi_chip">0/10 réponses</span></div>
+    </div>
+    <div class="calc-body" id="dlqi_qs"></div>
+    <div class="copyrow"><p class="sum" id="dlqi_sum"></p><button type="button" class="btn copy" data-sum="dlqi_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Une question sans réponse compte 0 ; à partir de deux, le score n’est pas calculé. Repères : 0–1 aucun effet, 2–5 faible, 6–10 modéré, 11–20 très important, 21–30 extrêmement important.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+</section>
+
+<!-- VERNEUIL -->
+<section class="panel" data-route="verneuil" hidden>
+  <div class="panel-head"><h2>Maladie de Verneuil</h2><p>IHS4 et stade de Hurley.</p><button type="button" class="btn-print" hidden>Imprimer ou enregistrer en PDF</button></div>
+  <form class="calc" data-calc="ihs4" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>IHS4</h3><p class="range">nodules + 2 × abcès + 4 × tunnels drainants</p></div>
+      <div class="score"><output id="ihs4_out">0</output><span class="chip lvl-1" id="ihs4_chip">Léger</span></div>
+    </div>
+    <div class="calc-body">
+      <div class="fields">
+        <div class="field"><label for="ihs_n">Nodules inflammatoires <span class="w">× 1</span></label><div class="stepper"><button type="button" class="step" data-for="ihs_n" data-d="-1" aria-label="Retirer un nodule">−</button><input class="num" id="ihs_n" inputmode="numeric" value="0"><button type="button" class="step" data-for="ihs_n" data-d="1" aria-label="Ajouter un nodule">+</button></div></div>
+        <div class="field"><label for="ihs_a">Abcès <span class="w">× 2</span></label><div class="stepper"><button type="button" class="step" data-for="ihs_a" data-d="-1" aria-label="Retirer un abcès">−</button><input class="num" id="ihs_a" inputmode="numeric" value="0"><button type="button" class="step" data-for="ihs_a" data-d="1" aria-label="Ajouter un abcès">+</button></div></div>
+        <div class="field"><label for="ihs_t">Tunnels drainants <span class="w">× 4</span></label><div class="stepper"><button type="button" class="step" data-for="ihs_t" data-d="-1" aria-label="Retirer un tunnel">−</button><input class="num" id="ihs_t" inputmode="numeric" value="0"><button type="button" class="step" data-for="ihs_t" data-d="1" aria-label="Ajouter un tunnel">+</button></div></div>
+      </div>
+    </div>
+    <div class="copyrow"><p class="sum" id="ihs4_sum"></p><button type="button" class="btn copy" data-sum="ihs4_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Repères : ≤ 3 léger, 4–10 modéré, ≥ 11 sévère.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+  <form class="calc" data-calc="hurley" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>Stade de Hurley</h3><p class="range">I – III</p></div>
+      <div class="score"><output id="hurley_out">—</output><span class="chip lvl-0" id="hurley_chip">Non renseigné</span></div>
+    </div>
+    <div class="calc-body"><div class="list" id="hurley_list"></div></div>
+    <div class="copyrow"><p class="sum" id="hurley_sum"></p><button type="button" class="btn copy" data-sum="hurley_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Stade de la région la plus atteinte.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+</section>
+
+<!-- URTICAIRE -->
+<section class="panel" data-route="urticaire" hidden>
+  <div class="panel-head"><h2>Urticaire chronique</h2><p>UAS7 : papules et prurit notés chaque jour pendant 7 jours consécutifs.</p><button type="button" class="btn-print" hidden>Imprimer ou enregistrer en PDF</button></div>
+  <form class="calc" data-calc="uas7" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>UAS7</h3><p class="range">0 – 42</p></div>
+      <div class="score"><output id="uas_out">0</output><span class="chip lvl-0" id="uas_chip">Sans symptôme</span></div>
+    </div>
+    <div class="calc-body">
+      <div class="legend-box">
+        <div><b>Papules</b> 0 aucune · 1 &lt; 20 / 24 h · 2 20–50 / 24 h · 3 &gt; 50 / 24 h ou grandes plaques confluentes</div>
+        <div><b>Prurit</b> 0 absent · 1 léger · 2 modéré · 3 intense</div>
+      </div>
+      <div class="days" id="uas_days"></div>
+    </div>
+    <div class="copyrow"><p class="sum" id="uas7_sum"></p><button type="button" class="btn copy" data-sum="uas7_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Repères : 0 sans symptôme, 1–6 bien contrôlée, 7–15 légère, 16–27 modérée, 28–42 sévère.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+</section>
+
+<!-- PELADE -->
+<section class="panel" data-route="pelade" hidden>
+  <div class="panel-head"><h2>Pelade</h2><p>Score SALT par quadrants ou plaques mesurées, sévérité AAS et indication d’un traitement systémique.</p><button type="button" class="btn-print" hidden>Imprimer ou enregistrer en PDF</button></div>
+  <div class="calc" id="salt-app" style="background:var(--surface); border:1px solid var(--line); border-radius:16px">
+    <div class="calc-head" aria-live="polite">
+      <div><h3>SALT</h3><p class="range" id="salt_class">Classe S0</p></div>
+      <div class="score"><output id="salt_total">0</output><span class="chip lvl-0" id="salt_sev">Aucune</span></div>
+      <div class="sbar"><i id="salt_fill"></i></div>
+    </div>
+    <div class="calc-body">
+      <div class="setup">
+        <label for="scalp">Surface du cuir chevelu</label>
+        <span class="unit"><input class="num" id="scalp" inputmode="numeric" value="500" style="width:5.5em"><span>cm²</span></span>
+        <span class="note">Adulte ≈ 490 cm² en moyenne, moins chez l’enfant. Sert seulement aux plaques mesurées.</span>
+      </div>
+      <p class="note">Chaque zone est découpée en 4 quadrants, comme la grille SALT. Touchez un quadrant pour le marquer atteint à 100 % (touchez-le à nouveau pour revenir à 0 %). Pour une atteinte partielle, glissez le doigt dans le quadrant ou utilisez le curseur. Vous pouvez aussi saisir les plaques mesurées : le pourcentage de la zone est alors calculé à partir des surfaces.</p>
+      <div class="zones" id="zones"></div>
+
+      <div class="decide" aria-live="polite">
+        <p class="sub-title">Sévérité AAS et traitement systémique</p>
+        <fieldset id="crit">
+          <legend>Critères AAS : font monter d’un niveau</legend>
+          <label><input type="checkbox" id="k-brow" data-aas="1"> Perte visible des sourcils ou des cils</label>
+          <label><input type="checkbox" id="k-psy" data-aas="1"> Retentissement psychosocial (souffrance, DLQI &gt; 10)</label>
+          <label><input type="checkbox" id="k-trac" data-aas="1"> Chute rapide, test de traction positif diffus</label>
+          <label><input type="checkbox" id="k-resp" data-aas="1"> Réponse insuffisante après ≥ 6 mois de traitement</label>
+        </fieldset>
+        <fieldset>
+          <legend>Durée</legend>
+          <label><input type="checkbox" id="k-6m"> Évolution depuis au moins 6 mois</label>
+        </fieldset>
+        <div class="verdict">
+          <div class="vrow" id="vr-aas"><b>AAS</b><span id="v-aas">—</span><small id="v-aas-why"></small></div>
+          <div class="vrow" id="vr-ind"><b>Systémique</b><span id="v-ind">—</span><small id="v-ind-why"></small></div>
+        </div>
+      </div>
+
+      <div class="out">
+        <p id="summary"></p>
+        <div class="btns">
+          <button id="copy" type="button" class="btn">Copier pour le dossier</button>
+          <button id="salt_reset" type="button" class="btn-ghost">Remettre à zéro</button>
+        </div>
+      </div>
+
+      <div class="ref note">
+        <p><b>Calcul</b> : pour chaque zone, % d’alopécie × poids de la zone (vertex 40 %, postérieur 24 %, latéral droit 18 %, latéral gauche 18 %). SALT = somme des 4 zones. Avec les quadrants, chaque quadrant vaut un quart de sa zone : 10 % au vertex, 6 % en postérieur, 4,5 % de chaque côté (la grille publiée arrondit à 4 et 5).</p>
+        <p><b>Plaques mesurées</b> : surface d’une plaque ronde = π × (Ø/2)², d’une plaque ovale = π × L × l / 4. Pourcentage de la zone = somme des surfaces / surface de la zone (surface du cuir chevelu × poids de la zone), plafonné à 100 %. Une plaque à cheval sur deux zones se saisit en deux parties.</p>
+        <p><b>Alopecia Areata Scale</b> : légère SALT ≤ 20 · modérée 21–49 · sévère 50–100. Classes S : S0 0 · S1 &lt; 25 · S2 25–49 · S3 50–74 · S4a 75–95 · S4b 96–99 · S5 100.</p>
+      </div>
+    </div>
+  </div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <pattern id="strands" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(25)">
+        <rect width="6" height="6" fill="var(--hair)"></rect>
+        <line x1="0" y1="0" x2="0" y2="6" stroke="var(--hair-2)" stroke-width="1.6"></line>
+      </pattern>
+    </defs>
+  </svg>
+</section>
+
+<!-- ISOTRETINOINE -->
+<section class="panel" data-route="isotretinoine">
+  <div class="panel-head"><h2>Isotrétinoïne</h2><p>Dose cumulée par périodes et durée restante pour atteindre 120 à 150 mg/kg.</p><button type="button" class="btn-print" hidden>Imprimer ou enregistrer en PDF</button></div>
+  <form class="stack" data-calc="iso" autocomplete="off">
+   <div class="col">
+    <div class="card">
+      <p class="label">Poids</p>
+      <div class="unit"><input class="num big" id="iso_w" inputmode="decimal" value="60" aria-label="Poids en kg"><span>kg</span></div>
+      <div class="two">
+        <div class="mini"><small>Cible min (120 mg/kg)</small><b id="iso_tmin">—</b></div>
+        <div class="mini"><small>Cible max (150 mg/kg)</small><b id="iso_tmax">—</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="label">Estimation · dose fixe</p>
+      <div class="unit"><input class="num big" id="iso_dd" inputmode="decimal" value="30" aria-label="Dose quotidienne en mg"><span>mg/j</span></div>
+      <p class="note" id="iso_ddkg"></p>
+      <div class="presets" id="iso_presets"></div>
+      <div class="two" id="iso_est"></div>
+    </div>
+    <div class="card">
+      <p class="label">Calcul par cycles</p>
+      <div class="cycles" id="iso_cycles"></div>
+      <button type="button" class="add" id="iso_add">+ Ajouter une période</button>
+      <p class="note">1 mois = 30 jours, soit 30 comprimés à une prise par jour.</p>
+    </div>
+   </div>
+   <div class="col col-r">
+    <div class="result" id="iso_result" aria-live="polite"></div>
+    <div class="copyrow" style="margin:0"><p class="sum" id="iso_sum"></p><button type="button" class="btn copy" data-sum="iso_sum">Copier pour le dossier</button></div>
+    <div style="display:flex; justify-content:flex-end"><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+   </div>
+  </form>
+</section>
+
+
+<!-- RISQUE CV -->
+<section class="panel" data-route="risquecv" hidden>
+  <div class="panel-head"><h2>Risque cardiovasculaire</h2><p>SCORE2 (40 à 69 ans) et SCORE2-OP (70 à 89 ans), recommandations ESC 2021 : risque à 10 ans d’événement cardiovasculaire fatal ou non fatal (infarctus, AVC). Pour une personne apparemment en bonne santé, sans maladie cardiovasculaire avérée, diabète, insuffisance rénale chronique ni hypercholestérolémie familiale.</p></div>
+  <form class="calc" data-calc="score2" autocomplete="off">
+    <div class="calc-head">
+      <div><h3 id="cv_model">SCORE2</h3><p class="range">Risque à 10 ans</p></div>
+      <div class="score"><output id="score2_out">—</output><span class="chip lvl-0" id="score2_chip">Données à saisir</span></div>
+    </div>
+    <div class="calc-body">
+      <div class="fields">
+        <div class="field"><label for="cv_age">Âge</label><div class="unit"><input class="num" id="cv_age" inputmode="numeric" placeholder="40 à 89"><span>ans</span></div></div>
+        <div class="field"><label for="cv_sbp">Pression artérielle systolique</label><div class="unit"><input class="num" id="cv_sbp" inputmode="numeric" placeholder="ex. 135"><span>mmHg</span></div></div>
+        <div class="field"><label for="cv_country">Pays de référence</label><select class="num" id="cv_country"></select>
+          <div id="cv_regbox" hidden><label for="cv_reg" class="sr-lab">Région de risque</label><select class="num" id="cv_reg"><option value="0">Faible risque</option><option value="1" selected>Risque modéré</option><option value="2">Risque élevé</option><option value="3">Risque très élevé</option></select></div>
+          <p class="note" id="cv_reginfo"></p></div>
+      </div>
+      <div class="fields">
+        <fieldset class="seg"><legend>Sexe</legend><div class="opts text">
+          <label><input type="radio" name="cv_sex" id="cv_sex_f" value="f" checked><span><b>Femme</b></span></label>
+          <label><input type="radio" name="cv_sex" id="cv_sex_m" value="m"><span><b>Homme</b></span></label>
+        </div></fieldset>
+        <fieldset class="seg"><legend>Tabagisme actuel</legend><div class="opts text">
+          <label><input type="radio" name="cv_smk" id="cv_smk_0" value="0" checked><span><b>Non</b></span></label>
+          <label><input type="radio" name="cv_smk" id="cv_smk_1" value="1"><span><b>Oui</b></span></label>
+        </div></fieldset>
+        <fieldset class="seg"><legend>Unité du cholestérol</legend><div class="opts text">
+          <label><input type="radio" name="cv_unit" id="cv_unit_gl" value="gl" checked><span><b>g/L</b></span></label>
+          <label><input type="radio" name="cv_unit" id="cv_unit_mm" value="mm"><span><b>mmol/L</b></span></label>
+        </div></fieldset>
+      </div>
+      <div class="fields">
+        <div class="field"><label for="cv_tc">Cholestérol total</label><div class="unit"><input class="num" id="cv_tc" inputmode="decimal" placeholder="ex. 2,10"><span class="cv_u">g/L</span></div></div>
+        <div class="field"><label for="cv_hdl">Cholestérol HDL</label><div class="unit"><input class="num" id="cv_hdl" inputmode="decimal" placeholder="ex. 0,55"><span class="cv_u">g/L</span></div></div>
+        <div class="field" style="justify-content:flex-end"><p class="note" id="cv_conv"></p></div>
+      </div>
+      <div class="alert" id="cv_alert" hidden></div>
+    </div>
+    <div class="copyrow"><p class="sum" id="score2_sum"></p><button type="button" class="btn copy" data-sum="score2_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Catégories ESC 2021 selon l’âge : moins de 50 ans, faible à modéré &lt; 2,5 %, élevé 2,5 à &lt; 7,5 %, très élevé ≥ 7,5 % ; 50 à 69 ans, &lt; 5 %, 5 à &lt; 10 %, ≥ 10 % ; 70 ans et plus, &lt; 7,5 %, 7,5 à &lt; 15 %, ≥ 15 %. Pour un patient né à l’étranger, l’outil AGLA conseille de tenir compte du pays d’origine, surtout en cas d’arrivée récente ou de mode de vie resté proche de celui du pays. Patient diabétique : utiliser SCORE2-Diabetes (non inclus ici).</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+</section>
+
+<!-- DEPRESSION -->
+<section class="panel" data-route="depression" hidden>
+  <div class="panel-head"><h2>Dépression</h2><p>PHQ-9 (auto-questionnaire du patient) et échelle de Hamilton à 17 items (cotée par le médecin).</p><button type="button" class="btn-print" hidden>Imprimer ou enregistrer en PDF</button></div>
+
+  <form class="calc" data-calc="phq9" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>PHQ-9</h3><p class="range">0 – 27 · 2 dernières semaines</p></div>
+      <div class="score"><output id="phq9_out">—</output><span class="chip lvl-0" id="phq9_chip">0/9 réponses</span></div>
+    </div>
+    <div class="calc-body">
+      <p class="note">Au cours des 2 dernières semaines, à quelle fréquence le patient a-t-il été gêné par les problèmes suivants ? Sous chaque item, la question à poser (reformulée, ce n’est pas le texte officiel).</p>
+      <div class="qs2" id="phq9_qs"></div>
+      <div class="alert" id="phq9_alert" hidden>Item 9 coté : évaluer le risque suicidaire au cours de la consultation. En cas de danger immédiat : 15 (SAMU). Numéro national de prévention du suicide : 3114.</div>
+    </div>
+    <div class="copyrow"><p class="sum" id="phq9_sum"></p><button type="button" class="btn copy" data-sum="phq9_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Repères : 0–4 minimale, 5–9 légère, 10–14 modérée, 15–19 modérément sévère, 20–27 sévère. Score calculé quand les 9 réponses sont saisies.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+
+  <form class="calc" data-calc="hamd" autocomplete="off">
+    <div class="calc-head">
+      <div><h3>Hamilton (HDRS-17)</h3><p class="range">0 – 52 · cotation par le médecin</p></div>
+      <div class="score"><output id="hamd_out">0</output><span class="chip lvl-0" id="hamd_chip">Pas de dépression</span></div>
+    </div>
+    <div class="calc-body">
+      <p class="note">Sous chaque item : une question à poser (ou ce qu’il faut observer) et les extrêmes de la cotation. Les niveaux intermédiaires se cotent selon la grille de Hamilton.</p>
+      <div class="qs2" id="hamd_qs"></div>
+      <div class="alert" id="hamd_alert" hidden>Item 3 (suicide) coté : évaluer le risque suicidaire au cours de la consultation. En cas de danger immédiat : 15 (SAMU). Numéro national de prévention du suicide : 3114.</div>
+    </div>
+    <div class="copyrow"><p class="sum" id="hamd_sum"></p><button type="button" class="btn copy" data-sum="hamd_sum">Copier pour le dossier</button></div>
+    <div class="calc-foot"><p class="note">Cotation de chaque item selon la grille de Hamilton (0 = absent). Repères usuels : 0–7 pas de dépression, 8–13 légère, 14–18 modérée, 19–22 sévère, ≥ 23 très sévère.</p><button type="reset" class="btn-ghost">Réinitialiser</button></div>
+  </form>
+</section>
+
+</div></main>
+<footer><div class="wrap"><p>Outil d’aide au calcul. Les résultats ne remplacent pas les grilles de référence ni l’évaluation clinique.</p></div></footer>
+
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const fmt=(x,d=1)=>Number(x).toLocaleString('fr-FR',{maximumFractionDigits:d,minimumFractionDigits:0});
+const r1=x=>Math.round(x*10)/10;
+const V=n=>{const el=document.querySelector(`input[name="${n}"]:checked`);return el?el.value:null;};
+const R=n=>{const v=V(n);return v===null?0:Number(v);};
+const num=id=>{const el=document.getElementById(id);if(!el)return 0;const v=parseFloat(String(el.value).replace(',','.').trim());return isFinite(v)?v:0;};
+const S={pasi:0,bsa:0,dlqi:null};
+const ISO_PRE=[10,20,25,30,35,40,45,50,55,60,65,70,75,80];
+const LOW={'Léger':'léger','Modéré':'modéré','Sévère':'sévère'};
+const FEM={'Léger':'légère','Modéré':'modérée','Sévère':'sévère'};
+const chipText=id=>$('#'+id+'_chip').textContent;
+const cycDays=(n,u)=>u==='months'?n*30:u==='days'?n:n*7;
+function fmtDur(days){const d=Math.ceil(days),w=Math.floor(d/7),rd=d%7,m=Math.floor(d/30),rm=d%30;
+  const lab=m>0?`${m} mois${rm>0?` + ${rm} j`:''}`:w>0?`${w} sem.${rd>0?` + ${rd} j`:''}`:`${d} j`;return {d,w,lab};}
+
+function seg(name,legend,opts,def,cls='fill'){
+  return `<fieldset class="seg"><legend>${legend}</legend><div class="opts ${cls}">`+opts.map(([v,l,s],i)=>
+    `<label><input type="radio" name="${name}" id="${name}_${i}" value="${v}"${def!==undefined&&String(v)===String(def)?' checked':''}><span><b>${l}</b>${s?`<small>${s}</small>`:''}</span></label>`).join('')+`</div></fieldset>`;
+}
+function list(name,items){
+  return items.map(([v,k,t,d],i)=>`<label><input type="radio" name="${name}" id="${name}_${i}" value="${v}"><span><b>${k}</b><em>${t}</em><small>${d}</small></span></label>`).join('');
+}
+function out(id,text,chip){
+  $('#'+id+'_out').textContent=text;
+  if(chip){const c=$('#'+id+'_chip');c.className='chip lvl-'+chip[1];c.textContent=chip[0];}
+}
+function setChip(el,[t,l]){el.className='chip lvl-'+l;el.textContent=t;}
+
+const AREA=[[0,'0','0 %'],[1,'1','<10 %'],[2,'2','10–29'],[3,'3','30–49'],[4,'4','50–69'],[5,'5','70–89'],[6,'6','≥ 90']];
+const S04=[0,1,2,3,4].map(v=>[v,String(v)]);
+const S03=[0,1,2,3].map(v=>[v,String(v)]);
+const SEASI=[[0,'0'],[1,'1'],[1.5,'1,5'],[2,'2'],[2.5,'2,5'],[3,'3']];
+
+/* ---------- PASI ---------- */
+const PASI_REG=[['t','Tête et cou',0.1],['s','Membres supérieurs',0.2],['c','Tronc',0.3],['i','Membres inférieurs',0.4]];
+$('#pasi_regions').innerHTML=PASI_REG.map(([k,n,w])=>`<div class="region"><div class="region-head"><h4>${n}</h4><span class="sub mono" id="pasi_${k}_sub">× ${fmt(w)}</span></div>
+${seg(`pasi_${k}_e`,'Érythème',S04,0)}${seg(`pasi_${k}_i`,'Infiltration',S04,0)}${seg(`pasi_${k}_d`,'Desquamation',S04,0)}${seg(`pasi_${k}_a`,'Surface atteinte',AREA,0)}</div>`).join('');
+
+function respBadges(el,base,cur,name,thr){
+  if(!(base>0)){el.innerHTML=`<span class="note">Saisir le ${name} initial pour calculer la réponse.</span>`;return;}
+  const imp=(base-cur)/base*100;
+  const head=imp>=0?`<span class="note">Amélioration <b class="mono">${fmt(imp,0)} %</b></span>`:`<span class="note">Aggravation <b class="mono">${fmt(-imp,0)} %</b></span>`;
+  el.innerHTML=head+thr.map(t=>`<span class="badge${imp>=t?' on':''}">${name} ${t}</span>`).join('');
+}
+
+const CALC={
+  pasi(){
+    let tot=0;
+    PASI_REG.forEach(([k,,w])=>{const s=(R(`pasi_${k}_e`)+R(`pasi_${k}_i`)+R(`pasi_${k}_d`))*R(`pasi_${k}_a`)*w;tot+=s;$(`#pasi_${k}_sub`).textContent=`× ${fmt(w)} = ${fmt(s,1)}`;});
+    tot=r1(tot);S.pasi=tot;
+    out('pasi',fmt(tot,1),tot===0?['Blanchi',0]:tot>10?['PASI > 10',3]:['PASI ≤ 10',1]);
+    respBadges($('#pasi_resp'),num('pasi_base'),tot,'PASI',[50,75,90,100]);
+    {const parts=PASI_REG.map(([k,n,w])=>`${n.toLowerCase()} ${fmt((R(`pasi_${k}_e`)+R(`pasi_${k}_i`)+R(`pasi_${k}_d`))*R(`pasi_${k}_a`)*w,1)}`);
+     let t=`Score PASI ${fmt(tot,1)}/72 (${parts.join(', ')}).`;
+     const base=num('pasi_base');
+     if(base>0){const imp=(base-tot)/base*100;const reached=[100,90,75,50].find(x=>imp>=x);
+       t+=imp>=0?` PASI initial ${fmt(base,1)}, soit une amélioration de ${fmt(imp,0)} %${reached?` (PASI ${reached} atteint)`:''}.`:` PASI initial ${fmt(base,1)}, soit une aggravation de ${fmt(-imp,0)} %.`;}
+     $('#pasi_sum').textContent=t;}
+  },
+  bsa(){
+    const b=Math.min(100,Math.max(0,num('bsa_p')));S.bsa=b;
+    out('bsa',fmt(b,1)+' %',b===0?['Aucune',0]:b<3?['Léger',1]:b<=10?['Modéré',2]:['Étendu',3]);
+    {const p=num('bsa_p');$('#bsa_sum').textContent=`Surface corporelle atteinte estimée à ${fmt(b,1)} % (${fmt(p,1)} paume${p>1?'s':''} du patient).`;}
+  },
+  iga(){
+    const v=V('iga');
+    if(v===null){out('iga','—',['Non renseigné',0]);$('#iga_sum').textContent='IGA non renseigné.';return;}
+    const L=[['Blanchi',1],['Presque blanchi',1],['Léger',2],['Modéré',3],['Sévère',4]];
+    out('iga',v,L[Number(v)]);
+    $('#iga_sum').textContent=`IGA ${v}/4 (${L[Number(v)][0].toLowerCase()}).`;
+  },
+  scorad(){
+    const child=V('sc_age')==='e';
+    let A=0;
+    SC_REG.forEach(([k,,wa,we])=>{const w=child?we:wa;$(`#sc_w_${k}`).textContent=`/ ${w} %`;A+=Math.min(100,Math.max(0,num('sc_'+k)))/100*w;});
+    let B=0;SC_ITEMS.forEach(([k])=>B+=R('sc_i_'+k));
+    const pr=num('sc_pr'),sl=num('sc_sl');$('#sc_pr_v').textContent=pr;$('#sc_sl_v').textContent=sl;
+    const C=pr+sl;
+    const o=A/5+3.5*B, s=o+C;
+    $('#sc_a').textContent=fmt(A,1);$('#sc_b').textContent=B;$('#sc_c').textContent=C;$('#sc_o').textContent=fmt(o,1);
+    out('scorad',fmt(s,1),s<25?['Léger',1]:s<=50?['Modéré',2]:['Sévère',3]);
+    setChip($('#sc_o_chip'),o<15?['Léger',1]:o<=40?['Modéré',2]:['Sévère',3]);
+    $('#scorad_sum').textContent=`SCORAD ${fmt(s,1)}/103 (${LOW[chipText('scorad')]}), avec une étendue de ${fmt(A,1)} %, une intensité de ${B}/18, un prurit à ${pr}/10 et une perte de sommeil à ${sl}/10. SCORAD objectif ${fmt(o,1)}/83 (${LOW[$('#sc_o_chip').textContent]}).`;
+  },
+  easi(){
+    const child=V('easi_age')==='e';
+    let tot=0;
+    EASI_REG.forEach(([k,,wa,we])=>{const w=child?we:wa;const s=(R(`easi_${k}_e`)+R(`easi_${k}_o`)+R(`easi_${k}_x`)+R(`easi_${k}_l`))*R(`easi_${k}_a`)*w;tot+=s;$(`#easi_${k}_sub`).textContent=`× ${fmt(w)} = ${fmt(s,1)}`;});
+    tot=r1(tot);
+    out('easi',fmt(tot,1),tot===0?['Blanchi',0]:tot<=1?['Presque blanchi',1]:tot<=7?['Léger',1]:tot<=21?['Modéré',2]:tot<=50?['Sévère',3]:['Très sévère',4]);
+    respBadges($('#easi_resp'),num('easi_base'),tot,'EASI',[50,75,90]);
+    {let t=`Score EASI ${fmt(tot,1)}/72 (${chipText('easi').toLowerCase()}${child?', pondération de l’enfant de 0 à 7 ans':''}).`;
+     const base=num('easi_base');
+     if(base>0){const imp=(base-tot)/base*100;const reached=[90,75,50].find(x=>imp>=x);
+       t+=imp>=0?` EASI initial ${fmt(base,1)}, soit une amélioration de ${fmt(imp,0)} %${reached?` (EASI ${reached} atteint)`:''}.`:` EASI initial ${fmt(base,1)}, soit une aggravation de ${fmt(-imp,0)} %.`;}
+     $('#easi_sum').textContent=t;}
+  },
+  dlqi(){
+    let n=0,s=0;
+    for(let i=1;i<=10;i++){const v=V('dlqi_'+i);if(v!==null){n++;s+=Number(v);}}
+    if(n<9){S.dlqi=null;out('dlqi','—',[`${n}/10 réponses`,0]);$('#dlqi_sum').textContent=`DLQI non calculable : ${n} réponses sur 10.`;}
+    else{S.dlqi=s;out('dlqi',String(s),s<=1?['Aucun effet',0]:s<=5?['Effet faible',1]:s<=10?['Effet modéré',2]:s<=20?['Effet très important',3]:['Effet extrêmement important',4]);
+      $('#dlqi_sum').textContent=`DLQI ${s}/30 : ${chipText('dlqi').toLowerCase()} sur la qualité de vie.`+(n===9?' Une question sans réponse, comptée 0.':'');
+      if(n===9)$('#dlqi_chip').textContent+=' · 9/10';}
+  },
+  ihs4(){
+    const s=Math.max(0,num('ihs_n'))+2*Math.max(0,num('ihs_a'))+4*Math.max(0,num('ihs_t'));
+    out('ihs4',fmt(s,0),s<=3?['Léger',1]:s<=10?['Modéré',2]:['Sévère',3]);
+    {const n=Math.max(0,num('ihs_n')),a=Math.max(0,num('ihs_a')),t=Math.max(0,num('ihs_t'));
+     $('#ihs4_sum').textContent=`IHS4 ${fmt(s,0)} (${n} nodule${n>1?'s':''} inflammatoire${n>1?'s':''}, ${a} abcès, ${t} tunnel${t>1?'s':''} drainant${t>1?'s':''}) : forme ${FEM[chipText('ihs4')]}.`;}
+  },
+  hurley(){
+    const v=V('hurley');
+    if(v===null){out('hurley','—',['Non renseigné',0]);$('#hurley_sum').textContent='Stade de Hurley non renseigné.';return;}
+    out('hurley',v,{I:['Stade I',1],II:['Stade II',2],III:['Stade III',3]}[v]);
+    $('#hurley_sum').textContent=`Maladie de Verneuil, stade ${v} de Hurley.`;
+  },
+  uas7(){
+    let t=0;
+    for(let d=1;d<=7;d++){const s=R(`uas_${d}_w`)+R(`uas_${d}_p`);t+=s;$(`#uas_${d}_sub`).textContent=s;}
+    out('uas',String(t),t===0?['Sans symptôme',0]:t<=6?['Bien contrôlée',1]:t<=15?['Légère',1]:t<=27?['Modérée',2]:['Sévère',3]);
+    $('#uas7_sum').textContent=t===0?'UAS7 0/42 : aucun symptôme sur les 7 jours.':`UAS7 ${t}/42 : urticaire ${chipText('uas').toLowerCase()}.`;
+  },
+  iso(){
+    const w=Math.max(0,num('iso_w')),dd=Math.max(0,num('iso_dd'));
+    $('#iso_tmin').textContent=fmt(w*120,0)+' mg';$('#iso_tmax').textContent=fmt(w*150,0)+' mg';
+    $('#iso_ddkg').textContent=w>0&&dd>0?`Soit ${fmt(dd/w,2)} mg/kg/j`:'';
+    $$('#iso_presets [data-dose]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.dose)===dd)));
+    $('#iso_est').innerHTML=[120,150].map(t=>{const f=fmtDur(w>0&&dd>0?w*t/dd:0);
+      return `<div class="mini"><small>→ ${t} mg/kg</small><div class="kvl"><span>jours</span><b>${f.d}</b></div><div class="kvl"><span>semaines</span><b>${f.w}</b></div><div class="kvl"><span>mois/sem. + j</span><b class="s">${f.lab}</b></div></div>`;}).join('');
+    let cum=0,last=0;
+    $$('#iso_cycles .cycle').forEach(c=>{const d=Math.max(0,num(c.dataset.d)),n=Math.max(0,num(c.dataset.n)),u=document.getElementById(c.dataset.u).value;const t=d*cycDays(n,u);cum+=t;c.querySelector('.tot').textContent=fmt(t,0)+' mg';if(d>0)last=d;});
+    const lastDose=last||dd;
+    const mk=w>0?cum/w:0,pct=Math.min(mk/150*100,110);
+    const col=mk<=0?'#8B7355':mk<120?'#F59E0B':mk<=150?'#22C55E':'#EF4444';
+    const lab=mk<=0?'—':mk<120?'En dessous de la cible':mk<=150?'Dans la fenêtre ✓':'Au-dessus de la cible';
+    const size=120,sw=9,r=(size-sw)/2,circ=2*Math.PI*r,dash=Math.min(pct/100,1)*circ;
+    let h=`<p class="rlabel">Dose cumulée (cycles)</p><div class="rtop"><div class="ring"><svg width="${size}" height="${size}" aria-hidden="true"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#EDE0D0" stroke-width="${sw}"></circle><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-dasharray="${dash} ${circ}" stroke-linecap="round" style="transition:stroke-dasharray .6s ease"></circle></svg><div class="c"><b>${Math.round(mk)}</b><small>mg/kg</small></div></div>
+      <div class="rinfo"><div class="rmg">${fmt(cum,0)} <span>mg</span></div><div class="mut" style="font-size:12px">Posologie actuelle : <b style="color:#FAF5EE">${fmt(lastDose,1)} mg/j</b>${w>0&&lastDose>0?` · <b style="color:#FAF5EE">${fmt(lastDose/w,2)} mg/kg/j</b>`:''}</div><div class="status" style="color:${col};background:${col}22;border-color:${col}55">${lab}</div>
+      <div class="rbar"><i class="win"></i><i class="fill" style="width:${Math.min(mk/200*100,100)}%;background:${col}"></i></div>
+      <div class="rticks"><span class="l">0</span><span style="left:60%">120</span><span style="left:75%">150</span><span class="r">200 mg/kg</span></div></div></div>`;
+    const any=[120,150].some(t=>w>0&&lastDose>0&&w*t-cum>0);
+    if(any){
+      const rows=[[120,'#FCD34D'],[150,'#86EFAC']];
+      h+=`<div class="rbox"><p class="rbox-h">Reste à faire · à ${fmt(lastDose,1)} mg/j (dernière posologie)</p>`+rows.map(([t,c])=>{const rem=w*t-cum;
+        if(rem<=0)return `<div class="rrow"><div class="rrow-h"><span class="rt" style="color:${c}">${t} mg/kg</span><span class="okt">✓ Cible atteinte</span></div></div>`;
+        const f=fmtDur(rem/lastDose);const end=new Date();end.setDate(end.getDate()+f.d);
+        return `<div class="rrow"><div class="rrow-h"><span class="rt" style="color:${c}">${t} mg/kg</span><b>${fmt(Math.round(rem),0)} mg</b><span class="mut">restants</span></div><div class="rgrid">${[['Jours',f.d,''],['Semaines',f.w,''],['Mois/sem. + j',f.lab,'s']].map(([u,v,k])=>`<div><b class="${k}" style="color:${c}">${v}</b><small>${u}</small></div>`).join('')}</div><p class="mut">Fin estimée vers le ${end.toLocaleDateString('fr-FR')}</p></div>`;}).join('')+`</div>`;
+      {const doses=[...new Set([...ISO_PRE,lastDose])].filter(d=>d>0).sort((a,b)=>a-b);
+       const c=(simCenter&&doses.includes(simCenter))?simCenter:lastDose;const ix=doses.indexOf(c);
+       const st=Math.max(0,Math.min(ix-2,doses.length-5));const win=doses.slice(st,st+5);
+       const opts=`<option value=""${simCenter?'':' selected'}>Dernière dose prescrite (${fmt(lastDose,1)} mg)</option>`+doses.map(d=>`<option value="${d}"${simCenter===d?' selected':''}>${fmt(d,1)} mg/j</option>`).join('');
+       h+=`<div class="rbox"><div class="rbox-h simhead"><span>Simulation · durée restante autour de ${fmt(c,1)} mg/j</span><label class="simsel"><span>Posologie</span><select id="iso_simsel" aria-label="Posologie au centre de la simulation">${opts}</select></label></div><div class="sim sim-h"><span>Dose/j</span><span style="color:#FCD34D">→ 120 mg/kg</span><span style="color:#86EFAC">→ 150 mg/kg</span></div>`+win.map(d=>{const cur=d===c;
+        return `<div class="sim${cur?' cur':''}"><span class="sd">${fmt(d,1)} mg${d===lastDose?'<small class="pres">prescrite</small>':''}</span>${[120,150].map((t,i)=>{const rem=w*t-cum;if(rem<=0)return `<span class="okt">✓</span>`;const f=fmtDur(rem/d);return `<span><b style="color:${i?'#86EFAC':'#FCD34D'}">${f.lab}</b><small>${f.w} sem. / ${Math.ceil(rem/d)} j</small></span>`;}).join('')}</div>`;}).join('')+`</div>`;}
+    }
+    $('#iso_result').innerHTML=h;
+    {const UW={days:'jour',weeks:'semaine',months:'mois'};
+     const per=$$('#iso_cycles .cycle').map(c=>{const d=num(c.dataset.d),n=num(c.dataset.n),u=document.getElementById(c.dataset.u).value;
+       const word=u==='months'?`mois${n>1?'':''} (${fmt(cycDays(n,u),0)} j)`:UW[u]+(n>1?'s':'');return `${fmt(d,1)} mg/j pendant ${fmt(n,1)} ${word}`;}).join(' ; ');
+     const st=mk<=0?'':mk<120?', en dessous de la cible de 120 mg/kg':mk<=150?', dans la fenêtre de 120 à 150 mg/kg':', au-dessus de 150 mg/kg';
+     let t=`Isotrétinoïne. Poids ${fmt(w,1)} kg. Dose cumulée de ${fmt(cum,0)} mg, soit ${fmt(mk,1)} mg/kg${st}. Périodes : ${per}.`+(w>0&&lastDose>0?` Posologie actuelle ${fmt(lastDose,1)} mg/j, soit ${fmt(lastDose/w,2)} mg/kg/j.`:'');
+     if(w>0&&lastDose>0)[120,150].forEach(tg=>{const rem=w*tg-cum;if(rem<=0)t+=` Cible de ${tg} mg/kg atteinte.`;else{const f=fmtDur(rem/lastDose);t+=` Reste ${fmt(Math.round(rem),0)} mg pour atteindre ${tg} mg/kg, soit ${f.lab} (${f.d} jours) à ${fmt(lastDose,1)} mg/j.`;}});
+     $('#iso_sum').textContent=t;}
+  }
+};
+
+/* ---------- IGA ---------- */
+$('#iga_list').innerHTML=list('iga',[
+  ['0','0','Blanchi','Pas de signe de psoriasis ; dyschromie post-inflammatoire possible'],
+  ['1','1','Presque blanchi','Plaques à peine palpables, érythème léger, desquamation fine et limitée'],
+  ['2','2','Léger','Infiltration, érythème et desquamation légers'],
+  ['3','3','Modéré','Infiltration, érythème et desquamation modérés'],
+  ['4','4','Sévère','Plaques très infiltrées, érythème intense, desquamation épaisse']]);
+
+/* ---------- SCORAD ---------- */
+const SC_REG=[['tc','Tête et cou',9,17],['msg','Membre supérieur gauche',9,9],['msd','Membre supérieur droit',9,9],['ta','Tronc antérieur',18,18],['dos','Dos',18,18],['mig','Membre inférieur gauche',18,12],['mid','Membre inférieur droit',18,12],['og','Organes génitaux',1,1]];
+$('#sc_regions').innerHTML=SC_REG.map(([k,n,w])=>`<div class="field"><label for="sc_${k}">${n} <span class="w" id="sc_w_${k}">/ ${w} %</span></label><div class="unit"><input class="num" id="sc_${k}" inputmode="decimal" value="0"><span>% atteint</span></div></div>`).join('');
+const SC_ITEMS=[['er','Érythème'],['oe','Œdème / papules'],['su','Suintement / croûtes'],['ex','Excoriations'],['li','Lichénification'],['se','Sécheresse (peau non lésée)']];
+$('#sc_items').innerHTML=SC_ITEMS.map(([k,n])=>seg('sc_i_'+k,n,[[0,'0','absent'],[1,'1','léger'],[2,'2','modéré'],[3,'3','sévère']],0)).join('');
+
+/* ---------- EASI ---------- */
+const EASI_REG=[['t','Tête et cou',0.1,0.2],['s','Membres supérieurs',0.2,0.2],['c','Tronc',0.3,0.3],['i','Membres inférieurs',0.4,0.3]];
+$('#easi_regions').innerHTML=EASI_REG.map(([k,n,w])=>`<div class="region"><div class="region-head"><h4>${n}</h4><span class="sub mono" id="easi_${k}_sub">× ${fmt(w)}</span></div>
+${seg(`easi_${k}_e`,'Érythème',SEASI,0)}${seg(`easi_${k}_o`,'Œdème / papules',SEASI,0)}${seg(`easi_${k}_x`,'Excoriations',SEASI,0)}${seg(`easi_${k}_l`,'Lichénification',SEASI,0)}${seg(`easi_${k}_a`,'Surface atteinte',AREA,0)}</div>`).join('');
+
+/* ---------- DLQI ---------- */
+const DQ=['Démangeaisons, douleur, sensation de brûlure','Gêne, embarras','Courses, maison, jardin','Choix des vêtements','Activités sociales, loisirs','Sport','Travail, études','Relations : conjoint, amis, famille','Vie sexuelle','Contraintes du traitement'];
+const STD=[[3,'Énormément'],[2,'Beaucoup'],[1,'Un peu'],[0,'Pas du tout']];
+const NC=[[0,'Non concerné']];
+const Q7=[[3,'Oui, empêché'],[2,'Non · beaucoup'],[1,'Non · un peu'],[0,'Non · pas du tout'],[0,'Non concerné']];
+$('#dlqi_qs').innerHTML=DQ.map((q,i)=>{const n=i+1;const o=n===7?Q7:n<=2?STD:STD.concat(NC);return seg('dlqi_'+n,`${n}. ${q}`,o,undefined,'text');}).join('');
+
+
+const DQ_HINT=['Ces 7 derniers jours, avez-vous eu des démangeaisons, des douleurs ou des sensations de brûlure de la peau ?','Ces 7 derniers jours, vous êtes-vous senti(e) gêné(e) ou mal à l’aise à cause de l’aspect de votre peau ?','Votre problème de peau vous a-t-il gêné(e) pour faire les courses, vous occuper de la maison ou du jardin ?','A-t-il influencé le choix des vêtements que vous portez ?','A-t-il eu des conséquences sur vos sorties, vos activités sociales ou vos loisirs ?','Vous a-t-il rendu difficile la pratique d’un sport ?','Vous a-t-il empêché(e) de travailler ou d’étudier ? Si non, vous a-t-il posé des problèmes au travail ou dans vos études ?','A-t-il compliqué vos relations avec votre conjoint(e), vos proches ou vos amis ?','A-t-il gêné votre vie sexuelle ?','Votre traitement a-t-il été une contrainte, par exemple en vous prenant du temps ou en salissant la maison ?'];
+$$('#dlqi_qs fieldset.seg').forEach((f,i)=>{const p=document.createElement('p');p.className='qhint';p.textContent=DQ_HINT[i];f.querySelector('legend').after(p);});
+
+/* ---------- Hurley ---------- */
+$('#hurley_list').innerHTML=list('hurley',[
+  ['I','I','Stade I','Abcès uniques ou multiples, sans tunnel ni cicatrice'],
+  ['II','II','Stade II','Abcès récidivants avec tunnels et cicatrices ; lésions uniques ou multiples séparées par de la peau saine'],
+  ['III','III','Stade III','Atteinte diffuse ou quasi diffuse, ou tunnels interconnectés et abcès sur toute la région']]);
+
+/* ---------- UAS7 ---------- */
+$('#uas_days').innerHTML=[1,2,3,4,5,6,7].map(d=>`<div class="day"><span class="d">J${d}</span>${seg(`uas_${d}_w`,'Papules',S03,0)}${seg(`uas_${d}_p`,'Prurit',S03,0)}<span class="s" id="uas_${d}_sub" aria-label="Score du jour ${d}">0</span></div>`).join('');
+
+/* ---------- Isotrétinoïne : cycles ---------- */
+let cycN=0;let simCenter=null;
+['input','change'].forEach(ev=>$('#iso_result').addEventListener(ev,e=>{if(e.target.id==='iso_simsel'){simCenter=e.target.value?Number(e.target.value):null;}}));
+function addCycle(dose,n,u){
+  cycN++;const k=cycN;const el=document.createElement('div');el.className='cycle';
+  el.dataset.d='iso_cd_'+k;el.dataset.n='iso_cn_'+k;el.dataset.u='iso_cu_'+k;
+  el.innerHTML=`<div class="cycle-head"><span class="cn">Période</span><button type="button" class="rm" aria-label="Supprimer la période">×</button></div>
+  <div class="cycle-grid">
+    <label class="f" for="iso_cd_${k}"><small>mg/j</small><input class="num" id="iso_cd_${k}" inputmode="decimal" value="${dose}"></label>
+    <label class="f" for="iso_cn_${k}"><small>durée</small><input class="num" id="iso_cn_${k}" inputmode="numeric" value="${n}"></label>
+    <label class="f" for="iso_cu_${k}"><small>unité</small><select class="num" id="iso_cu_${k}"><option value="days"${u==='days'?' selected':''}>Jours</option><option value="weeks"${u==='weeks'?' selected':''}>Semaines</option><option value="months"${u==='months'?' selected':''}>Mois (30 j)</option></select></label>
+    <div class="f"><small>total</small><div class="tot">0 mg</div></div>
+  </div>`;
+  $('#iso_cycles').appendChild(el);numberCycles();return el;
+}
+function numberCycles(){const cs=$$('#iso_cycles .cycle');cs.forEach((c,i)=>{c.querySelector('.cn').textContent='Période '+(i+1);c.querySelector('.rm').hidden=cs.length<2;});}
+$('#iso_presets').innerHTML=ISO_PRE.map(p=>`<button type="button" class="pill" data-dose="${p}" aria-pressed="false">${p} mg</button>`).join('');
+$('#iso_presets').addEventListener('click',e=>{const b=e.target.closest('[data-dose]');if(!b)return;$('#iso_dd').value=b.dataset.dose;CALC.iso();});
+addCycle(30,4,'weeks');
+$('#iso_add').addEventListener('click',()=>{const c=addCycle(num('iso_dd')||30,4,'weeks');CALC.iso();c.querySelector('input').focus();});
+$('#iso_cycles').addEventListener('click',e=>{const b=e.target.closest('.rm');if(!b)return;b.closest('.cycle').remove();numberCycles();CALC.iso();});
+
+
+/* ---------- Dépression ---------- */
+const PHQ=['Peu d’intérêt ou de plaisir à faire les choses','Tristesse, déprime ou désespoir','Troubles du sommeil (endormissement, réveils, ou dormir trop)','Fatigue ou manque d’énergie','Peu d’appétit ou manger trop','Mauvaise opinion de soi, sentiment d’échec','Difficultés de concentration','Lenteur ou, au contraire, agitation','Pensées qu’il vaudrait mieux être mort ou envie de se faire du mal'];
+const PHQ_O=[[0,'Jamais'],[1,'Plusieurs jours'],[2,'Plus de la moitié du temps'],[3,'Presque tous les jours']];
+$('#phq9_qs').innerHTML=PHQ.map((q,i)=>seg('phq9_'+(i+1),`${i+1}. ${q}`,PHQ_O,undefined,'text')).join('');
+const HAMD=[['Humeur dépressive',4],['Sentiments de culpabilité',4],['Suicide',4],['Insomnie du début de nuit',2],['Insomnie du milieu de nuit',2],['Insomnie du matin',2],['Travail et activités',4],['Ralentissement',4],['Agitation',4],['Anxiété psychique',4],['Anxiété somatique',4],['Symptômes somatiques gastro-intestinaux',2],['Symptômes somatiques généraux',2],['Symptômes génitaux',2],['Hypocondrie',4],['Perte de poids',2],['Prise de conscience',2]];
+$('#hamd_qs').innerHTML=HAMD.map(([q,m],i)=>seg('hamd_'+(i+1),`${i+1}. ${q} (0–${m})`,Array.from({length:m+1},(_,v)=>[v,String(v)]),0)).join('');
+
+const PHQ_HINT=['Au cours des 2 dernières semaines, avez-vous eu peu d’intérêt ou peu de plaisir à faire les choses ?','Vous êtes-vous senti(e) triste, déprimé(e) ou désespéré(e) ?','Avez-vous eu du mal à vous endormir ou à rester endormi(e), ou au contraire avez-vous trop dormi ?','Vous êtes-vous senti(e) fatigué(e) ou avez-vous manqué d’énergie ?','Avez-vous eu peu d’appétit, ou au contraire mangé plus que d’habitude ?','Avez-vous eu une mauvaise opinion de vous-même, l’impression d’avoir échoué ou d’avoir déçu vos proches ?','Avez-vous eu du mal à vous concentrer, par exemple pour lire ou regarder la télévision ?','Avez-vous bougé ou parlé plus lentement que d’habitude, au point que d’autres l’ont remarqué ? Ou au contraire, avez-vous été agité(e) au point de ne pas tenir en place ?','Avez-vous pensé qu’il vaudrait mieux être mort(e), ou envisagé de vous faire du mal d’une manière ou d’une autre ?'];
+const HAMD_HINT=['« Comment est votre moral ces derniers jours ? Vous sentez-vous triste, découragé(e), sans espoir ? » 0 absente · 4 exprimée verbalement et non verbalement (visage, voix, pleurs).','« Vous faites-vous des reproches ? Avez-vous le sentiment d’avoir fait du tort ou de mériter ce qui vous arrive ? » 0 absent · 4 hallucinations accusatrices ou menaçantes.','« Avez-vous l’impression que la vie ne vaut pas la peine d’être vécue ? Avez-vous pensé à mourir ou à vous faire du mal ? » 0 absent · 4 tentative de suicide.','« Avez-vous du mal à vous endormir le soir ? » 0 pas de difficulté · 2 difficulté chaque nuit.','« Vous réveillez-vous au milieu de la nuit ? Arrivez-vous à vous rendormir ? » 0 pas de difficulté · 2 se lève au milieu de la nuit.','« Vous réveillez-vous plus tôt que vous ne le voudriez, sans pouvoir vous rendormir ? » 0 pas de difficulté · 2 incapable de se rendormir.','« Comment se passent votre travail et vos activités ? Avez-vous perdu l’intérêt ou l’envie ? » 0 pas de difficulté · 4 a arrêté de travailler du fait de la maladie.','Observé : lenteur de la pensée, de la parole et des gestes, baisse de la concentration. 0 normal · 4 stupeur.','Observé : impossibilité de rester en place, mains qui s’agitent, ongles rongés, cheveux tirés. 0 aucune · 4 agitation majeure.','« Vous sentez-vous tendu(e), irritable, inquiet(ète) pour des choses sans importance ? » 0 absente · 4 peurs exprimées spontanément.','« Avez-vous eu des palpitations, une oppression, des troubles digestifs, des sueurs, des maux de tête ? » 0 absente · 4 invalidante.','« Comment est votre appétit ? Devez-vous vous forcer à manger ? » 0 aucun · 2 doit être incité(e) à manger ou prend un traitement digestif.','« Vous sentez-vous fatigué(e), lourd(e) ? Avez-vous des douleurs (dos, tête, muscles) ? » 0 aucun · 2 symptômes nets.','« Votre désir sexuel a-t-il changé ? » (et troubles des règles chez la femme). 0 absent · 2 important.','« Vous inquiétez-vous beaucoup pour votre santé physique ? » 0 absente · 4 conviction délirante d’être malade.','« Avez-vous perdu du poids depuis le début de ces troubles ? » 0 pas de perte · 2 perte certaine.','« Pensez-vous être malade, déprimé(e) ? » 0 reconnaît être déprimé(e) · 2 nie être malade.'];
+[['#phq9_qs',PHQ_HINT],['#hamd_qs',HAMD_HINT]].forEach(([sel,H])=>$$(sel+' fieldset.seg').forEach((f,i)=>{const p=document.createElement('p');p.className='qhint';p.textContent=H[i];f.querySelector('legend').after(p);}));
+
+CALC.phq9=function(){
+  let n=0,s=0;for(let i=1;i<=9;i++){const v=V('phq9_'+i);if(v!==null){n++;s+=Number(v);}}
+  const i9=V('phq9_9');$('#phq9_alert').hidden=!(i9!==null&&Number(i9)>0);
+  if(n<9){out('phq9','—',[`${n}/9 réponses`,0]);$('#phq9_sum').textContent=`PHQ-9 incomplet : ${n} réponses sur 9.`;return;}
+  const L=s<=4?['Minimale',0]:s<=9?['Légère',1]:s<=14?['Modérée',2]:s<=19?['Modérément sévère',3]:['Sévère',4];
+  out('phq9',String(s),L);
+  $('#phq9_sum').textContent=`PHQ-9 ${s}/27 : symptomatologie dépressive ${L[0].toLowerCase()}. Item 9 (pensées de mort ou d’auto-agression) coté ${i9}/3.`;
+};
+CALC.hamd=function(){
+  let s=0;for(let i=1;i<=17;i++)s+=R('hamd_'+i);
+  const L=s<=7?['Pas de dépression',0]:s<=13?['Légère',1]:s<=18?['Modérée',2]:s<=22?['Sévère',3]:['Très sévère',4];
+  out('hamd',String(s),L);
+  const su=R('hamd_3');$('#hamd_alert').hidden=!(su>0);
+  $('#hamd_sum').textContent=(s<=7?`Échelle de Hamilton (HDRS-17) ${s}/52 : pas de dépression.`:`Échelle de Hamilton (HDRS-17) ${s}/52 : dépression ${L[0].toLowerCase()}.`)+` Item suicide coté ${su}/4.`;
+};
+
+
+/* ---------- NAPSI ---------- */
+const FINGERS=['Pouce','Index','Majeur','Annulaire','Auriculaire'];
+const TOES=['Hallux','2e orteil','3e orteil','4e orteil','5e orteil'];
+const NAILS=[];
+[['hd',FINGERS,'droit'],['hg',FINGERS,'gauche'],['pd',TOES,'droit'],['pg',TOES,'gauche']].forEach(([k,names,side])=>{
+  $('#napsi_'+k).innerHTML=names.map((n,i)=>{const id=`napsi_${k}${i}`;NAILS.push({id,k,label:`${n.toLowerCase()} ${side}`,foot:k[0]==='p'});
+    return `<div class="region nail"><div class="region-head"><h4>${n}</h4><span class="sub" id="${id}_sub">0</span></div>${seg(id+'_m','Matrice',S04,0)}${seg(id+'_l','Lit',S04,0)}</div>`;}).join('');
+});
+CALC.napsi=function(){
+  const feet=V('napsi_scope')==='hf';$('#napsi_feet').hidden=!feet;
+  let m=0,l=0,n=0;const hit=[];
+  NAILS.forEach(x=>{const a=R(x.id+'_m'),b=R(x.id+'_l');$('#'+x.id+'_sub').textContent=a+b;
+    if(x.foot&&!feet)return;m+=a;l+=b;if(a+b>0){n++;hit.push(`${x.label} ${a+b} (M${a}/L${b})`);}});
+  const t=m+l,max=feet?160:80;
+  $('#napsi_range').textContent=`0 – ${max} · ${feet?'20 ongles, mains et pieds':'10 ongles des mains'}`;
+  out('napsi',String(t),[`${n} ongle${n>1?'s':''} atteint${n>1?'s':''}`,n?2:0]);
+  $('#napsi_m').textContent=m;$('#napsi_l').textContent=l;
+  $('#napsi_sum').textContent=`NAPSI ${t}/${max} (${feet?'mains et pieds':'mains'}) : ${n} ongle${n>1?'s':''} atteint${n>1?'s':''}, score matriciel ${m}, score du lit unguéal ${l}.`+(hit.length?` Détail : ${hit.join(' ; ')}.`:'');
+};
+
+
+/* ---------- SCORE2 / SCORE2-OP (ESC 2021) ---------- */
+const SC2={m:{age:0.3742,smk:0.6012,sbp:0.2777,tc:0.1458,hdl:-0.2698,a_smk:-0.0755,a_sbp:-0.0255,a_tc:-0.0281,a_hdl:0.0426,s0:0.9605},
+           f:{age:0.4648,smk:0.7744,sbp:0.3131,tc:0.1002,hdl:-0.2606,a_smk:-0.1088,a_sbp:-0.0277,a_tc:-0.0226,a_hdl:0.0613,s0:0.9776}};
+const SC2_SC={m:[[-0.5699,0.7476],[-0.1565,0.8009],[0.3207,0.9360],[0.5836,0.8294]],f:[[-0.7380,0.7019],[-0.3143,0.7701],[0.5710,0.9369],[0.9412,0.8329]]};
+const OP={m:{age:0.0634,smk:0.3524,sbp:0.0094,tc:0.0850,hdl:-0.3564,a_smk:-0.0247,a_sbp:-0.0005,a_tc:0.0073,a_hdl:0.0091,s0:0.7576,mean:0.0929},
+          f:{age:0.0789,smk:0.4921,sbp:0.0102,tc:0.0605,hdl:-0.3040,a_smk:-0.0255,a_sbp:-0.0004,a_tc:-0.0009,a_hdl:0.0154,s0:0.8082,mean:0.2290}};
+const OP_SC={m:[[-0.34,1.19],[0.01,1.25],[0.08,1.15],[0.05,0.70]],f:[[-0.52,1.01],[-0.10,1.10],[0.38,1.09],[0.38,0.69]]};
+const REG_LAB=['faible risque','risque modéré','risque élevé','risque très élevé'];
+const CV_COUNTRIES=[[0,['Belgique','Danemark','Espagne','France','Israël','Luxembourg','Norvège','Pays-Bas','Royaume-Uni','Suisse']],
+ [1,['Allemagne','Autriche','Chypre','Finlande','Grèce','Irlande','Islande','Italie','Malte','Portugal','Saint-Marin','Slovénie','Suède']],
+ [2,['Albanie','Bosnie-Herzégovine','Croatie','Estonie','Hongrie','Kazakhstan','Pologne','Slovaquie','Tchéquie','Turquie']],
+ [3,['Algérie','Arménie','Azerbaïdjan','Biélorussie','Bulgarie','Égypte','Géorgie','Kirghizistan','Lettonie','Liban','Libye','Lituanie','Macédoine du Nord','Maroc','Moldavie','Monténégro','Ouzbékistan','Roumanie','Russie','Serbie','Syrie','Tunisie','Ukraine']]];
+{const all=[];CV_COUNTRIES.forEach(([r,l])=>l.forEach(n=>all.push([n,r])));all.sort((a,b)=>a[0].localeCompare(b[0],'fr'));
+ $('#cv_country').innerHTML=all.map(([n,r])=>`<option value="${r}|${n}"${n==='France'?' selected':''}>${n}</option>`).join('')+'<option value="autre">Autre pays (non classé par l’ESC)</option>';}
+function score2Risk(age,sex,smk,sbp,tc,hdl,reg){
+  let lp,unc,sc;const k=smk?1:0;
+  if(age<70){const c=SC2[sex],a=(age-60)/5,s=(sbp-120)/20,t=tc-6,h=(hdl-1.3)/0.5;
+    lp=c.age*a+c.smk*k+c.sbp*s+c.tc*t+c.hdl*h+c.a_smk*a*k+c.a_sbp*a*s+c.a_tc*a*t+c.a_hdl*a*h;
+    unc=1-Math.pow(c.s0,Math.exp(lp));sc=SC2_SC[sex][reg];}
+  else{const c=OP[sex],a=age-73,s=sbp-150,t=tc-6,h=hdl-1.4;
+    lp=c.age*a+c.smk*k+c.sbp*s+c.tc*t+c.hdl*h+c.a_smk*a*k+c.a_sbp*a*s+c.a_tc*a*t+c.a_hdl*a*h;
+    unc=1-Math.pow(c.s0,Math.exp(lp-c.mean));sc=OP_SC[sex][reg];}
+  return 1-Math.exp(-Math.exp(sc[0]+sc[1]*Math.log(-Math.log(1-unc))));
+}
+window.score2Risk=score2Risk;
+CALC.score2=function(){
+  const gl=V('cv_unit')==='gl';$$('.cv_u').forEach(e=>e.textContent=gl?'g/L':'mmol/L');
+  $('#cv_tc').placeholder=gl?'ex. 2,10':'ex. 5,4';$('#cv_hdl').placeholder=gl?'ex. 0,55':'ex. 1,4';
+  const cval=$('#cv_country').value,other=cval==='autre';$('#cv_regbox').hidden=!other;
+  const reg=other?Number($('#cv_reg').value):Number(cval.split('|')[0]),country=other?'':cval.split('|')[1];
+  $('#cv_reginfo').textContent=other?'Pays non classé par l’ESC : choisissez la région la plus proche (par exemple selon la région d’origine).':`Région à ${REG_LAB[reg]} (classement ESC 2021).`;
+  const age=num('cv_age'),sbp=num('cv_sbp'),sex=V('cv_sex'),smk=V('cv_smk')==='1';
+  const f=gl?1/0.3867:1,tc=num('cv_tc')*f,hdl=num('cv_hdl')*f;
+  $('#cv_conv').textContent=gl&&tc>0&&hdl>0?`Soit ${fmt(tc,2)} et ${fmt(hdl,2)} mmol/L`:'';
+  const al=$('#cv_alert');al.hidden=true;
+  if(!(age>0&&sbp>0&&tc>0&&hdl>0)){$('#cv_model').textContent=age>=70?'SCORE2-OP':'SCORE2';out('score2','—',['Données à saisir',0]);$('#score2_sum').textContent='SCORE2 : données incomplètes.';return;}
+  if(age<40||age>=90){out('score2','—',['Âge hors 40–89 ans',0]);$('#score2_sum').textContent='SCORE2 non applicable : âge en dehors de 40 à 89 ans.';return;}
+  const warn=[];if(sbp<100||sbp>225)warn.push('PAS');if(tc<3||tc>9)warn.push('cholestérol total');if(hdl<0.65||hdl>1.94)warn.push('HDL');
+  if(warn.length){al.hidden=false;al.textContent=`Valeur hors des limites usuelles du modèle (${warn.join(', ')}) : résultat à interpréter avec prudence.`;}
+  const model=age<70?'SCORE2':'SCORE2-OP';$('#cv_model').textContent=model;
+  const r=score2Risk(age,sex,smk,sbp,tc,hdl,reg)*100;
+  const th=age<50?[2.5,7.5]:age<70?[5,10]:[7.5,15];
+  const L=r<th[0]?['Faible à modéré',1]:r<th[1]?['Élevé',2]:['Très élevé',3];
+  out('score2',fmt(r,1)+' %',L);
+  const tcTxt=gl?`${fmt(num('cv_tc'),2)} g/L`:`${fmt(tc,2)} mmol/L`,hdlTxt=gl?`${fmt(num('cv_hdl'),2)} g/L`:`${fmt(hdl,2)} mmol/L`;
+  $('#score2_sum').textContent=`${model} (ESC 2021, ${country?`pays de référence : ${country}, `:''}région à ${REG_LAB[reg]}) : risque d’événement cardiovasculaire fatal ou non fatal à 10 ans estimé à ${fmt(r,1)} %, soit un risque ${L[0].toLowerCase()} pour l’âge. ${sex==='m'?'Homme':'Femme'} de ${fmt(age,0)} ans, ${smk?(sex==='f'?'fumeuse':'fumeur'):(sex==='f'?'non-fumeuse':'non-fumeur')}, PAS ${fmt(sbp,0)} mmHg, cholestérol total ${tcTxt}, HDL ${hdlTxt}.`;
+};
+
+/* ---------- wiring ---------- */
+function rule10(){
+  const items=[['ten_pasi',S.pasi,fmt(S.pasi,1)],['ten_bsa',S.bsa,fmt(S.bsa,1)+' %'],['ten_dlqi',S.dlqi,S.dlqi===null?'—':String(S.dlqi)]];
+  let over=0;
+  items.forEach(([id,v,txt])=>{const el=$('#'+id);el.querySelector('b').textContent=txt;const o=v!==null&&v>10;el.classList.toggle('over',o);if(o)over++;});
+  setChip($('#ten_chip'),over?[`${over} critère${over>1?'s':''} > 10`,3]:['Aucun critère > 10',1]);
+  $('#ten_sum').textContent=`Règle des 10 : PASI ${fmt(S.pasi,1)}, BSA ${fmt(S.bsa,1)} %, DLQI ${S.dlqi===null?'non renseigné':S.dlqi}. `+(over?`${over} critère${over>1?'s':''} supérieur${over>1?'s':''} à 10.`:'Aucun critère supérieur à 10.');
+}
+function run(name){if(CALC[name])CALC[name]();if(['pasi','bsa','dlqi'].includes(name))rule10();}
+document.addEventListener('input',e=>{const f=e.target.closest('form[data-calc]');if(f)run(f.dataset.calc);});
+document.addEventListener('change',e=>{const f=e.target.closest('form[data-calc]');if(f)run(f.dataset.calc);});
+document.addEventListener('click',e=>{const b=e.target.closest('.step');if(!b)return;const i=document.getElementById(b.dataset.for);i.value=String(Math.max(0,num(b.dataset.for)+Number(b.dataset.d)));i.dispatchEvent(new Event('input',{bubbles:true}));});
+$$('form[data-calc]').forEach(f=>{
+  f.addEventListener('submit',e=>e.preventDefault());
+  f.addEventListener('reset',()=>setTimeout(()=>{if(f.dataset.calc==='iso'){simCenter=null;$$('#iso_cycles .cycle').slice(1).forEach(c=>c.remove());numberCycles();}run(f.dataset.calc);},0));
+});
+Object.keys(CALC).forEach(run);
+
+/* ---------- copier pour le dossier ---------- */
+document.addEventListener('click',e=>{const b=e.target.closest('.copy');if(!b)return;const el=document.getElementById(b.dataset.sum);const txt=el.textContent;const lab='Copier pour le dossier';
+  const sel=()=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Texte sélectionné';setTimeout(()=>b.textContent=lab,2000);};
+  try{navigator.clipboard.writeText(txt).then(()=>{b.textContent='Copié';setTimeout(()=>b.textContent=lab,1500);},sel);}catch(_){sel();}});
+
+/* ---------- impression ---------- */
+let topLevel=false;try{topLevel=window.top===window.self;}catch(_){}
+$$('.btn-print').forEach(b=>{b.hidden=false;b.addEventListener('click',()=>{
+  if(topLevel){window.print();return;}
+  let m=b.nextElementSibling;if(!m||!m.classList.contains('print-msg')){m=document.createElement('p');m.className='note print-msg';b.after(m);}
+  m.textContent='Dans Claude, l’impression est bloquée. Ouvrez votre site Netlify (ou le fichier index.html sur votre Mac) : ce bouton y ouvre la fenêtre d’impression, avec « Enregistrer au format PDF ».';});});
+const setPrintDate=()=>{const h=$('.panel:not([hidden]) h2');$('#print_date').textContent=`Score Dermato · ${h?h.textContent:''} · ${new Date().toLocaleDateString('fr-FR')}`;};
+window.addEventListener('beforeprint',setPrintDate);
+
+/* ---------- routing ---------- */
+const routes=$$('.panel').map(p=>p.dataset.route);
+function show(route){
+  let h=route;if(!h){try{h=location.hash.slice(1);}catch(_){h='';}}
+  const r=routes.includes(h)?h:'isotretinoine';
+  $$('.panel').forEach(p=>p.hidden=p.dataset.route!==r);
+  document.documentElement.dataset.tab=r;
+  if(r==='pelade'&&window.initSalt)window.initSalt();
+  const list=$('.tablist');
+  $$('.tablist a').forEach(a=>{if(a.dataset.route===r){a.setAttribute('aria-current','page');
+      try{const L=a.offsetLeft,W=a.offsetWidth;if(L<list.scrollLeft||L+W>list.scrollLeft+list.clientWidth)list.scrollLeft=L-16;}catch(_){}}
+    else a.removeAttribute('aria-current');});
+}
+$$('.tablist a').forEach(a=>{a.dataset.route=a.getAttribute('href').slice(1);
+  a.addEventListener('click',e=>{e.preventDefault();show(a.dataset.route);try{history.replaceState(null,'','#'+a.dataset.route);}catch(_){}window.scrollTo(0,0);});});
+window.addEventListener('hashchange',()=>{show();window.scrollTo(0,0);});
+const setTop=()=>{try{document.documentElement.style.setProperty('--top-h',$('.top').offsetHeight+'px');}catch(_){}};
+setTop();window.addEventListener('resize',setTop);
+show();
+})();
+</script>
+
+<script>
+(function(){
+const app=document.getElementById("salt-app");
+const NOSE_TOP='<path d="M60 8 l-6 10 h12z" fill="var(--skin)" stroke="var(--skin-edge)" stroke-width="1.5"/>';
+const Z=[
+ {id:"vertex",name:"Vertex",w:.40,label:"vue de dessus",
+  head:`<ellipse cx="60" cy="72" rx="44" ry="56"/><ellipse cx="14" cy="76" rx="6" ry="12"/><ellipse cx="106" cy="76" rx="6" ry="12"/>`,
+  extra:NOSE_TOP, front:"avant",
+  zone:`<ellipse cx="60" cy="74" rx="40" ry="50"/>`},
+ {id:"post",name:"Postérieur",w:.24,label:"vue de dos",
+  head:`<path d="M16 64 C16 30 36 12 60 12 C84 12 104 30 104 64 C104 92 90 112 76 118 L76 136 L44 136 L44 118 C30 112 16 92 16 64Z"/><ellipse cx="13" cy="70" rx="5" ry="11"/><ellipse cx="107" cy="70" rx="5" ry="11"/>`,
+  zone:`<path d="M19 66 C19 32 38 16 60 16 C82 16 101 32 101 66 C101 86 92 102 80 110 C70 106 50 106 40 110 C28 102 19 86 19 66Z"/>`},
+ {id:"droit",name:"Latéral droit",w:.18,label:"profil droit",
+  head:`<path d="M22 66 C20 32 42 12 66 12 C90 12 106 30 106 52 L112 70 L104 72 L104 86 C104 96 96 102 86 102 L80 102 L80 136 L46 136 L46 112 C30 104 22 86 22 66Z"/><ellipse cx="64" cy="70" rx="7" ry="11"/>`,
+  zone:`<path d="M36 28 C40 23 47 21 55 21 L84 21 C90 21 92 25 92 30 L92 76 C92 81 88 82 84 80 L76 79 C75 67 71 59 64 59 C57 59 53 67 53 75 L53 79 C49 83 43 83 39 81 C33 79 30 73 30 65 L30 36 C30 32 32 30 36 28Z"/>`},
+ {id:"gauche",name:"Latéral gauche",w:.18,label:"profil gauche",mirror:true}
+];
+Object.assign(Z[3],{head:Z[2].head,zone:Z[2].zone});
+const QN=["haut gauche","haut droit","bas gauche","bas droit"];
+const state={}; Z.forEach(z=>state[z.id]={q:[0,0,0,0],sel:0,plaques:[]});
+const host=document.getElementById("zones");
+const scalpEl=document.getElementById("scalp");
+const scalp=()=>{const v=parseFloat(String(scalpEl.value).replace(",","."));return v>=50?v:500};
+const fmt=x=>(Math.round(x*10)/10).toLocaleString("fr-FR");
+const areaOf=p=>{const a=+p.d||0,b=+p.d2||a;return (p.n||0)*Math.PI*a*b/4};
+const ellipsePath=(cx,cy,rx,ry)=>`M${cx-rx} ${cy}a${rx} ${ry} 0 1 0 ${2*rx} 0a${rx} ${ry} 0 1 0 ${-2*rx} 0Z`;
+let ready=false;
+
+function sample(z,shape,svg){
+  const bb=shape.getBBox();z.mx=bb.x+bb.width/2;z.my=bb.y+bb.height/2;z.bb=bb;
+  const pt=svg.createSVGPoint(),pts=[],Q=[[],[],[],[]];
+  for(let y=0.5;y<140;y+=1)for(let x=0.5;x<120;x+=1){
+    pt.x=x;pt.y=y;
+    if(shape.isPointInFill(pt)){pts.push([x,y]);Q[(y<z.my?0:2)+(x<z.mx?0:1)].push([x,y])}
+  }
+  z.pts=pts;z.N=pts.length;
+  z.quads=Q.map(P=>{
+    const cx=P.reduce((s,p)=>s+p[0],0)/P.length,cy=P.reduce((s,p)=>s+p[1],0)/P.length;
+    return {cx,cy,N:P.length,d:P.map(p=>Math.hypot(p[0]-cx,p[1]-cy)).sort((a,b)=>a-b)};
+  });
+}
+function quadRect(z,i){
+  const b=z.bb,x0=i%2?z.mx:b.x-2,x1=i%2?b.x+b.width+2:z.mx,y0=i<2?b.y-2:z.my,y1=i<2?z.my:b.y+b.height+2;
+  return {x:x0,y:y0,w:x1-x0,h:y1-y0};
+}
+function quadPatch(z,i,p){
+  if(p<=0)return"";
+  const q=z.quads[i],r=p>=100?300:q.d[Math.min(q.N-1,Math.floor(p/100*q.N))];
+  return `<path clip-path="url(#qc-${z.id}-${i})" d="${ellipsePath(q.cx,q.cy,r,r)}" fill="var(--skin)" stroke="var(--skin-edge)" stroke-width="1" stroke-dasharray="2 2"/>`;
+}
+function measuredPatches(z){
+  const s=Math.sqrt(z.N/(scalp()*z.w)),list=[];
+  state[z.id].plaques.forEach(p=>{const a=+p.d||0,b=+p.d2||a;for(let i=0;i<Math.min(p.n||0,60);i++)if(a>0)list.push({rx:a/2*s,ry:b/2*s})});
+  list.sort((u,v)=>v.rx*v.ry-u.rx*u.ry);
+  const placed=[];let out="";
+  list.forEach((q,k)=>{
+    const R=Math.max(q.rx,q.ry);let best=null,bs=-Infinity;
+    for(let i=(k*37)%7;i<z.pts.length;i+=7){
+      const [x,y]=z.pts[i];
+      let sc=placed.length?Math.min(...placed.map(o=>Math.hypot(x-o.x,y-o.y)-o.R-R))-Math.hypot(x-z.mx,y-z.my)*0.15:-Math.hypot(x-z.mx,y-z.my);
+      if(sc>bs){bs=sc;best=[x,y]}
+    }
+    placed.push({x:best[0],y:best[1],R});
+    out+=`<ellipse cx="${best[0]}" cy="${best[1]}" rx="${q.rx.toFixed(2)}" ry="${q.ry.toFixed(2)}" fill="var(--skin)" stroke="var(--skin-edge)" stroke-width="1" stroke-dasharray="2 2"/>`;
+  });
+  return out;
+}
+function zonePct(z){
+  const st=state[z.id];
+  if(!st.plaques.length)return {p:st.q.reduce((a,b)=>a+b,0)/4,measured:false};
+  const a=st.plaques.reduce((s,p)=>s+areaOf(p),0);
+  return {p:Math.min(100,a/(scalp()*z.w)*100),measured:true,area:a};
+}
+function buildZone(z){
+  const el=document.createElement("div");el.className="zone";
+  const t=z.mirror?'transform="translate(120 0) scale(-1 1)"':'';
+  el.innerHTML=`
+  <svg viewBox="0 0 120 140" role="img" aria-label="Schéma ${z.name}, touchez un quadrant pour le sélectionner">
+    <defs><clipPath id="clip-${z.id}">${z.zone}</clipPath></defs>
+    <g ${t} id="g-${z.id}">
+      <g fill="var(--skin)" stroke="var(--skin-edge)" stroke-width="1.5">${z.head}</g>
+      ${z.extra||""}
+      <g clip-path="url(#clip-${z.id})"><g fill="url(#strands)">${z.zone}</g><g id="p-${z.id}"></g></g>
+      <g fill="none" stroke="var(--ink)" stroke-width="1.2" class="outline">${z.zone}</g>
+    </g>
+    <g id="ql-${z.id}" font-family="IBM Plex Mono, monospace" font-size="9" text-anchor="middle"></g>
+    ${z.front?`<text x="60" y="6" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="sans-serif">${z.front}</text>`:""}
+  </svg>
+  <div class="side">
+    <h4>${z.name}</h4><span class="w">${Math.round(z.w*100)} % · 4 × ${fmt(z.w*25)} % · ${z.label}</span>
+    <div class="pct"><span id="v-${z.id}">0</span><small> %</small> <span class="mode" id="m-${z.id}"></span></div>
+    <div class="qsel" id="qs-${z.id}"></div>
+    <input type="range" id="r-${z.id}" min="0" max="100" step="5" value="0" aria-label="% d'alopécie du quadrant sélectionné, ${z.name}">
+    <div class="steps"><button type="button" class="sm" data-d="-1" aria-label="moins 1 %">−1</button><button type="button" class="sm" data-d="1" aria-label="plus 1 %">+1</button></div>
+    <div class="contrib" id="c-${z.id}"></div>
+  </div>
+  <div class="plaques">
+    <div id="list-${z.id}" style="display:grid;gap:6px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <button type="button" class="sm" id="add-${z.id}">+ Plaque mesurée</button>
+      <span class="ptot" id="pt-${z.id}"></span>
+    </div>
+  </div>`;
+  host.appendChild(el);
+  const svg=el.querySelector("svg");
+  sample(z,el.querySelector(".outline > *"),svg);
+  const defs=svg.querySelector("defs");
+  for(let i=0;i<4;i++){const r=quadRect(z,i);defs.insertAdjacentHTML("beforeend",`<clipPath id="qc-${z.id}-${i}"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}"/></clipPath>`)}
+  const b=z.bb;
+  const grid=`<line x1="${z.mx}" y1="${b.y}" x2="${z.mx}" y2="${b.y+b.height}" stroke="var(--ink)" stroke-width="1"/><line x1="${b.x}" y1="${z.my}" x2="${b.x+b.width}" y2="${z.my}" stroke="var(--ink)" stroke-width="1"/>`;
+  svg.querySelector(`#g-${z.id} [clip-path="url(#clip-${z.id})"]`).insertAdjacentHTML("beforeend",grid+`<rect id="hl-${z.id}" fill="var(--accent)" fill-opacity=".22" stroke="var(--accent)" stroke-width="2"/>`);
+  const st=state[z.id];
+  const clamp=v=>Math.max(0,Math.min(100,Math.round(v)));
+  const setQ=v=>{st.q[st.sel]=clamp(v);render()};
+  el.querySelector("#r-"+z.id).addEventListener("input",e=>setQ(+e.target.value));
+  el.querySelectorAll(".steps button[data-d]").forEach(bt=>bt.addEventListener("click",()=>{if(st.plaques.length)return;setQ(st.q[st.sel]+ +bt.dataset.d)}));
+  let drag=false,moved=false,p0=null;
+  const toLocal=e=>{const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());return [z.mirror?120-q.x:q.x,q.y]};
+  const quadAt=([x,y])=>(y<z.my?0:2)+(x<z.mx?0:1);
+  svg.addEventListener("pointerdown",e=>{if(st.plaques.length)return;drag=true;moved=false;svg.setPointerCapture(e.pointerId);p0=toLocal(e);st.sel=quadAt(p0);render()});
+  svg.addEventListener("pointermove",e=>{
+    if(!drag)return;const [x,y]=toLocal(e);
+    if(!moved&&Math.hypot(x-p0[0],y-p0[1])<4)return;moved=true;
+    const q=z.quads[st.sel],d=Math.hypot(x-q.cx,y-q.cy);
+    let lo=0,hi=q.N;while(lo<hi){const m=(lo+hi)>>1;if(q.d[m]<d)lo=m+1;else hi=m}
+    setQ(lo/q.N*100);
+  });
+  svg.addEventListener("pointerup",()=>{if(drag&&!moved)setQ(st.q[st.sel]>=100?0:100);drag=false});
+  svg.addEventListener("pointercancel",()=>drag=false);
+  el.querySelector("#add-"+z.id).addEventListener("click",()=>{st.plaques.push({n:1,d:"",d2:""});buildList(z);render();
+    const ins=el.querySelectorAll(`#list-${z.id} input[data-k="d"]`);ins[ins.length-1].focus()});
+}
+function buildList(z){
+  const box=document.getElementById("list-"+z.id);box.innerHTML="";
+  state[z.id].plaques.forEach((p,i)=>{
+    const row=document.createElement("div");row.className="prow";
+    row.innerHTML=`<input id="pn-${z.id}-${i}" data-k="n" inputmode="numeric" value="${p.n}" aria-label="Nombre de plaques"> plaque(s) de
+      <input id="pd-${z.id}-${i}" data-k="d" inputmode="decimal" value="${p.d}" placeholder="Ø" aria-label="Diamètre ou grand axe en cm"> ×
+      <input id="pe-${z.id}-${i}" data-k="d2" inputmode="decimal" value="${p.d2}" placeholder="opt." aria-label="Petit axe en cm, si plaque ovale"> cm
+      <span class="area" id="pa-${z.id}-${i}"></span>
+      <button type="button" class="sm x" aria-label="Supprimer cette ligne">×</button>`;
+    row.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",()=>{
+      const v=inp.value.replace(",",".");p[inp.dataset.k]=inp.dataset.k==="n"?Math.max(0,Math.round(+v||0)):v;render()}));
+    row.querySelector(".x").addEventListener("click",()=>{state[z.id].plaques.splice(i,1);buildList(z);render()});
+    box.appendChild(row);
+  });
+}
+function sClass(s){if(s===0)return"S0";if(s<25)return"S1";if(s<50)return"S2";if(s<75)return"S3";if(s<100)return s<=95?"S4a":"S4b";return"S5";}
+function sev(s){if(s===0)return["Aucune",0];if(s<=20)return["Légère",1];if(s<50)return["Modérée",2];return["Sévère",3];}
+function render(){
+  if(!ready)return;
+  let t=0;const parts=[];
+  Z.forEach(z=>{
+    const st=state[z.id],r=zonePct(z),c=r.p*z.w;t+=c;
+    const rng=document.getElementById("r-"+z.id);rng.value=st.q[st.sel];rng.disabled=r.measured;
+    document.getElementById("v-"+z.id).textContent=fmt(r.p);
+    document.getElementById("m-"+z.id).textContent=r.measured?"mesuré":"";
+    document.getElementById("qs-"+z.id).textContent=r.measured?"Calculé à partir des plaques":`Quadrant ${QN[st.sel]} : ${st.q[st.sel]} %`;
+    document.getElementById("p-"+z.id).innerHTML=r.measured?measuredPatches(z):[0,1,2,3].map(i=>quadPatch(z,i,st.q[i])).join("");
+    const hl=document.getElementById("hl-"+z.id),qr=quadRect(z,st.sel);
+    if(r.measured)hl.setAttribute("width",0);else{hl.setAttribute("x",qr.x);hl.setAttribute("y",qr.y);hl.setAttribute("width",qr.w);hl.setAttribute("height",qr.h)}
+    document.getElementById("ql-"+z.id).innerHTML=r.measured?"":[0,1,2,3].map(i=>{
+      const q=z.quads[i],x=z.mirror?120-q.cx:q.cx;
+      return `<text x="${x.toFixed(1)}" y="${(q.cy+3).toFixed(1)}" fill="var(--ink)" stroke="var(--surface)" stroke-width="2.5" paint-order="stroke" font-weight="${i===st.sel?700:500}">${st.q[i]}</text>`}).join("");
+    document.getElementById("c-"+z.id).textContent=`${fmt(r.p)} × ${z.w.toFixed(2).replace(".",",")} = ${fmt(c)} pts`;
+    st.plaques.forEach((p,i)=>{const a=document.getElementById(`pa-${z.id}-${i}`);if(a)a.textContent=areaOf(p)?fmt(areaOf(p))+" cm²":""});
+    document.getElementById("pt-"+z.id).textContent=r.measured?`Total ${fmt(r.area)} cm² / ${Math.round(scalp()*z.w)} cm²${r.p>=100?" (plafonné à 100 %)":""}`:"";
+    let desc=`${z.name.toLowerCase()} ${fmt(r.p)} %`;
+    if(r.measured){
+      const pl=st.plaques.filter(p=>areaOf(p)>0).map(p=>`${p.n} × ${(""+p.d).replace(".",",")}${p.d2?" × "+(""+p.d2).replace(".",","):""} cm`).join(", ");
+      if(pl)desc+=` (plaques : ${pl})`;
+    }
+    parts.push(desc);
+  });
+  t=Math.round(t*10)/10;
+  const [label,lvl]=sev(t);
+  document.getElementById("salt_total").textContent=fmt(t);
+  const c=document.getElementById("salt_sev");c.className="chip lvl-"+lvl;c.textContent=label;
+  document.getElementById("salt_class").textContent="Classe "+sClass(t)+" · 0 – 100";
+  document.getElementById("salt_fill").style.width=t+"%";
+  const dec=decide(t);
+  document.getElementById("summary").textContent=`Score SALT ${fmt(t)}/100 (pelade ${label==="Aucune"?"sans alopécie":label.toLowerCase()}, classe ${sClass(t)}). Répartition de l'alopécie : ${parts.join(" ; ")}.`+dec.text;
+}
+const CRIT=[...app.querySelectorAll(".decide fieldset input")].filter(c=>c.id!=="k-6m");
+const LEV=["légère","modérée","sévère"];
+function decide(t){
+  const on=CRIT.filter(c=>c.checked),aas=on.filter(c=>c.dataset.aas);
+  const names=on.map(c=>c.parentElement.textContent.trim().replace(/^./,m=>m.toLowerCase()));
+  const six=document.getElementById("k-6m").checked,rapid=document.getElementById("k-trac").checked;
+  const ra=document.getElementById("vr-aas"),ri=document.getElementById("vr-ind");
+  ra.className="vrow";ri.className="vrow";
+  if(t===0){
+    document.getElementById("v-aas").textContent="Non applicable";document.getElementById("v-aas-why").textContent="Aucune alopécie saisie.";
+    document.getElementById("v-ind").textContent="—";document.getElementById("v-ind-why").textContent="";return {text:""};
+  }
+  const base=t<=20?0:t<50?1:2,lev=Math.min(2,base+(aas.length?1:0));
+  document.getElementById("v-aas").textContent="Pelade "+LEV[lev];
+  document.getElementById("v-aas-why").textContent=aas.length&&base<2?`SALT ${["léger","modéré","sévère"][base]} + au moins 1 caractéristique clinique : un niveau de plus.`:`D'après le SALT${aas.length?" (déjà au niveau maximal)":""}.`;
+  if(lev===2)ra.classList.add("yes");
+  let ind=false,why="";
+  if(t>=50){ind=true;why="SALT ≥ 50."}
+  else if(t>20&&on.length){ind=true;why="SALT modéré avec au moins un critère AAS."}
+  else if(t>20)why="SALT modéré sans critère AAS coché.";
+  else why=on.length?"SALT ≤ 20 : les critères ne suffisent pas à poser l'indication.":"SALT ≤ 20.";
+  const vi=document.getElementById("v-ind");
+  if(ind&&(six||rapid)){vi.textContent="Indication remplie";ri.classList.add("yes");why+=six?" Évolution ≥ 6 mois.":" Progression rapide : pas d'attente de 6 mois."}
+  else if(ind){vi.textContent="Sévérité suffisante, délai non atteint";ri.classList.add("wait");why+=" Moins de 6 mois d'évolution et pas de progression rapide."}
+  else vi.textContent="Indication non remplie";
+  document.getElementById("v-ind-why").textContent=why+" Le vécu du patient pèse aussi dans la décision.";
+  let text=` Pelade ${LEV[lev]} selon l'Alopecia Areata Scale`;
+  text+=names.length?`, avec : ${names.join(", ")}.`:".";
+  if(six)text+=" Évolution depuis au moins 6 mois.";
+  text+=ind&&(six||rapid)?" Les critères d'indication d'un traitement systémique sont remplis.":ind?" La sévérité justifie un traitement systémique, mais le délai d'évolution de 6 mois n'est pas atteint.":"";
+  return {text};
+}
+app.querySelectorAll(".decide input").forEach(c=>c.addEventListener("change",render));
+scalpEl.addEventListener("input",render);
+document.getElementById("copy").addEventListener("click",e=>{
+  const txt=document.getElementById("summary").textContent,b=e.currentTarget;
+  const sel=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById("summary"));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Texte sélectionné"};
+  try{navigator.clipboard.writeText(txt).then(()=>{b.textContent="Copié";setTimeout(()=>b.textContent="Copier pour le dossier",1500)},sel)}catch(_){sel()}
+});
+document.getElementById("salt_reset").addEventListener("click",()=>{Z.forEach(z=>{state[z.id]={q:[0,0,0,0],sel:0,plaques:[]};buildList(z)});app.querySelectorAll(".decide input").forEach(c=>c.checked=false);scalpEl.value="500";render()});
+window.initSalt=function(){
+  if(ready)return;
+  try{Z.forEach(buildZone);ready=true;render();}catch(err){console.error(err);}
+};
+if(!app.closest(".panel").hidden)window.initSalt();
+})();
+</script>
+
+</body></html>
